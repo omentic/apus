@@ -2,12 +2,10 @@ package model.html;
 
 import java.util.*;
 
-import model.html.HtmlTree;
+import model.util.Node;
 import org.javatuples.*;
 
-
 /*
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -74,28 +72,37 @@ public class HtmlParser {
         UNKNOWN_TAG, CLOSING_TAG,
     }
 
-    public static ArrayList<HtmlTree> parseHtmlLL(String input) {
+    public static ArrayList<Node> parseHtmlLL(String input) {
 
-        var result = new ArrayList<HtmlTree>();
-        var unfinished = new ArrayDeque<HtmlTree>();
+        var result = new ArrayList<Node>();
+        var unfinished = new ArrayDeque<ElementNode>();
         var currentTag = "";
         var currentAttributes = new ArrayList<Pair<String, String>>();
         var currentKey = "";
         var currentValue = "";
         var currentText = "";
+        var previousChar = '\0';
 
         // We safely? assume to start outside of all nodes.
         ParserState state = ParserState.HTML;
 
         for (char c : input.toCharArray()) {
+            // System.out.print(state);
+            // System.out.println(" " + c + " " + currentText);
             switch (state) {
                 case HTML:
                     switch (c) {
                         case '<':
+                            state = ParserState.UNKNOWN_TAG;
                             if (!currentText.equals("")) {
-                                // unfinished.add(text) idk
+                                if (unfinished.size() != 0) {
+                                    unfinished.getLast().addChild(new TextNode(currentText));
+                                } else {
+                                    result.add(new TextNode(currentText));
+                                }
+                                currentText = "";
                             }
-
+                            break; // FOOTGUN LANGUAGE DESIGN
                         default:
                             currentText += c;
                             break;
@@ -106,21 +113,34 @@ public class HtmlParser {
                         case '/':
                             state = ParserState.CLOSING_TAG;
                             break;
-                        case '>':
+                        case '>': // Why would you put <> in your HTML??? go away
                             state = ParserState.HTML;
+                            currentText += "<>";
                             System.out.println("Why would you put <> in your HTML??? go away");
                             break;
-                        default:
+                        // Currently doesn't handle <!DOCTYPE> different from any other tag
+                        case '!': default:
                             state = ParserState.OPENING_TAG;
                             currentTag += c;
                             break;
                     }
+                    break; // FOOTGUN LANGUAGE DESIGN STRIKES AGAIN
                 case OPENING_TAG:
                     switch (c) {
                         case '>':
                             state = ParserState.HTML;
-                            // unfinished.add(new HtmlTree(tag)
+                            var node = new ElementNode(currentTag, currentAttributes);
+                            System.out.println("Adding ElementNode " + currentTag);
+                            System.out.println("Current size of unfinished: " + unfinished.size());
+                            if (unfinished.size() != 0) {
+                                unfinished.getLast().addChild(node);
+                                unfinished.add(node);
+                            } else {
+                                result.add(node);
+                                unfinished.add((ElementNode) result.get(result.size() - 1));
+                            }
                             currentTag = "";
+                            currentAttributes = new ArrayList<>();
                             break;
                         case ' ': case '\n':
                             state = ParserState.KEY;
@@ -133,10 +153,14 @@ public class HtmlParser {
                 case CLOSING_TAG:
                     switch (c) {
                         case '>':
+                            state = ParserState.HTML;
                             // IMPORTANT: we don't validate that closing tags correspond to an open tag
                             if (!isSelfClosingTag(currentTag)) {
-                                //unknown.pop
+                                if (unfinished.size() != 0) {
+                                    unfinished.removeLast();
+                                }
                             }
+                            currentTag = "";
                             break;
                         case ' ': case '\n':
                             break;
@@ -149,13 +173,18 @@ public class HtmlParser {
                     switch (c) {
                         case '>':
                             state = ParserState.HTML;
-                            if (currentAttributes.size() != 0) {
-                                // unfinished.something idk new HtmlTree(tag=currentTag, attributes=currentAttributes)
-                                currentAttributes.clear();
+                            var node = new ElementNode(currentTag, currentAttributes);
+                            System.out.println("Adding ElementNode " + currentTag);
+                            System.out.println("Current size of unfinished: " + unfinished.size());
+                            if (unfinished.size() != 0) {
+                                unfinished.getLast().addChild(node);
+                                unfinished.add(node);
                             } else {
-                                // unfinished.add(new HtmlTree(tag)
+                                result.add(node);
+                                unfinished.add((ElementNode) result.get(result.size() - 1));
                             }
                             currentTag = "";
+                            currentAttributes = new ArrayList<>();
                             break;
                         case '=':
                             state = ParserState.VALUE;
@@ -185,8 +214,20 @@ public class HtmlParser {
                                 currentKey = "";
                                 currentValue = "";
                             }
-                            // unfinished.something idk new HtmlTree(tag=currentTag, attributes=currentAttributes)
-                            currentAttributes.clear();
+                            state = ParserState.HTML;
+                            var node = new ElementNode(currentTag, currentAttributes);
+                            System.out.println("Adding ElementNode " + currentTag);
+                            System.out.println("Current size of unfinished: " + unfinished.size());
+                            if (unfinished.size() != 0) {
+                                unfinished.getLast().addChild(node);
+                                unfinished.add(node);
+                            } else {
+                                result.add(node);
+                                unfinished.add((ElementNode) result.get(result.size() - 1));
+                            }
+                            currentTag = "";
+                            currentAttributes = new ArrayList<>();
+                            break;
                         default:
                             currentValue += c;
                             break;
@@ -195,15 +236,33 @@ public class HtmlParser {
                 case SINGLE_QUOTE:
                     switch (c) {
                         case '\'':
-                            state = ParserState.VALUE;
+                            if (previousChar != '\\') {
+                                state = ParserState.VALUE;
+                                previousChar = '\0';
+                            } else {
+                                currentValue += c;
+                                previousChar = c;
+                            }
+                            break;
                         default:
                             currentValue += c;
+                            previousChar = c;
                             break;
                     }
                     break;
                 case DOUBLE_QUOTE:
                     switch (c) {
+                        case '\"':
+                            if (previousChar != '\\') {
+                                state = ParserState.VALUE;
+                                previousChar = '\0';
+                            } else {
+                                currentValue += c;
+                                previousChar = c;
+                            }
                         default:
+                            currentValue += c;
+                            previousChar = c;
                             break;
                     }
                     break;
@@ -211,7 +270,6 @@ public class HtmlParser {
         }
         return result;
     }
-
 
     private static boolean isSelfClosingTag(String tag) {
         switch (tag) {
@@ -225,64 +283,4 @@ public class HtmlParser {
                 return false;
         }
     }
-
-    /*
-    public static void parseHtmlLL(String input) {
-        String tag = "";
-        ArrayList<Pair<String, String>> attributes = new ArrayList<>();
-        boolean inTag = false;
-        boolean inAttribute = false; // for checking if we're in quotes
-
-        for (int i = 0; i < input.length(); i++) {
-            if (inTag) {
-                if (inAttribute) {
-                    switch (input.charAt(i)) {
-                        case '\"'
-                    }
-                } else {
-                    switch (input.charAt(i)) {
-
-                    }
-                }
-
-
-            } else {
-                switch (input.charAt(i)) {
-                    case '<':
-                }
-            }
-        }
-    }
-
-    private static void parseAttribute(String input) {
-
-    }
-*/
-
-/*
-    public static void parseHTML(ArrayList<String> input) {
-        String data = "";
-        ArrayList<ParseTree> children = new ArrayList<ParseTree>();
-
-        boolean inTag = false;
-        boolean tagComplete = false;
-
-        for (String i : input) {
-            if (inTag) {
-                if (i.equals(">")) {
-                    inTag = false;
-                    tagComplete = true;
-                    // remove ending tags and recursively parse out children
-                } else {
-                    data += i;
-                }
-            } else {
-                if (i.equals("<")) {
-                    inTag = true;
-                }
-            }
-
-        }
-
-    }*/
 }
