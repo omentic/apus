@@ -1,4 +1,4 @@
-package model;
+package model.css;
 
 import model.css.CssParser;
 import org.javatuples.Pair;

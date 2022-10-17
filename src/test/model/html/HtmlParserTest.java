@@ -1,4 +1,4 @@
-package model;
+package model.html;
 
 import model.html.ElementNode;
 import model.html.HtmlParser;

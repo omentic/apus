@@ -12,7 +12,7 @@ I've heard that Java Swing has a native HTML rendering component. I hope to enti
 
 ## user stories
 
-- As a user, I want to open and render an HTML file.
-- As a user, I want to be able to add a new tab to a list of open tabs.
-- As a user, I want to be able to click links on a rendered webpage and view the linked pages.
-- As a user, I want to be able to apply basic styling to an open page.
+- As a user, I want to be able to construct a structural representation of an HTML file.
+- As a user, I want to be able to construct a structural representation of a CSS file.
+- As a user, I want to be able to add multiple Nodes to an HTML file.
+- As a user, I want to be able to open and render an arbitrary HTML file.
