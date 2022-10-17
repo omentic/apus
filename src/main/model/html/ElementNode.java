@@ -28,7 +28,16 @@ public class ElementNode implements Node {
      * MODIFIES: this
      */
     public ElementNode(String tag, ArrayList<Pair<String, String>> attributes) {
-        this(tag, attributes, new ArrayList<Node>());
+        this(tag, attributes, new ArrayList<>());
+    }
+
+    /**
+     * Overloads the constructor for ease of use. Should probably only be used for tests.
+     * EFFECTS: Constructs a new ElementNode from the arguments provided.
+     * MODIFIES: this
+     */
+    public ElementNode(String tag) {
+        this(tag, new ArrayList<>(), new ArrayList<>());
     }
 
     /**
@@ -43,12 +52,16 @@ public class ElementNode implements Node {
         return this.tag;
     }
 
+    public ArrayList<Pair<String, String>> getAttributes() {
+        return this.attributes;
+    }
+
     public ArrayList<Node> getChildren() {
         return this.children;
     }
 
     // We implement this method for easy debugging.
     public String getData() {
-        return getTag();
+        return getTag() + " " + getAttributes().toString();
     }
 }

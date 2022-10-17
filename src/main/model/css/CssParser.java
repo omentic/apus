@@ -4,7 +4,10 @@ import org.javatuples.*;
 
 import java.util.*;
 
-/*
+/**
+ * This class represents the state of and implements an LL(1) CSS parser.
+ * For convenience, the following (slightly wrong) context-free grammar for CSS is below.
+ * <br>
  * RULES ::= (RULE)+
  * RULE ::= SELECTORS '{' (PROPERTY | (PROPERTY ';')*) '}'
  * SELECTORS ::= SELECTOR (COMBINATOR SELECTOR)*
@@ -216,13 +219,14 @@ public class CssParser {
                     previousChar = '\0';
                 } else {
                     // possibly not the best way to handle this, may be better to keep the backslash
-                    currentValue = currentValue.substring(0, currentValue.length() - 2);
+                    currentValue = currentValue.substring(0, currentValue.length() - 1);
                     currentValue += c;
                     previousChar = c;
                 }
                 break;
             default:
                 currentValue += c;
+                previousChar = c;
                 break;
         }
     }
@@ -239,13 +243,14 @@ public class CssParser {
                     currentValue += c;
                     previousChar = '\0';
                 } else {
-                    currentValue = currentValue.substring(0, currentValue.length() - 2);
+                    currentValue = currentValue.substring(0, currentValue.length() - 1);
                     currentValue += c;
                     previousChar = c;
                 }
                 break;
             default:
                 currentValue += c;
+                previousChar = c;
                 break;
         }
     }
@@ -258,7 +263,7 @@ public class CssParser {
      * REQUIRES: A string of the form [NUMBER][VALIDUNIT]
      * EFFECTS: Returns a number, in pixels, that has been converted appropriately
      */
-    private static double parseUnits(String input) {
+    public static double parseUnits(String input) {
         String numbers = "";
         String units = "";
         // imagine making a language without iterable strings, fml
@@ -305,30 +310,29 @@ public class CssParser {
 }
 
 /*
- *     body {
- *         background-color: #f0f0f2;
- *         margin: 0;
- *         padding: 0;
- *         font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
- *         "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
- *
- *     }
- *     div {
- *         width: 600px;
- *         margin: 5em auto;
- *         padding: 2em;
- *         background-color: #fdfdff;
- *         border-radius: 0.5em;
- *         box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);
- *     }
- *     a:link, a:visited {
- *         color: #38488f;
- *         text-decoration: none;
- *     }
- *     @media (max - width : 700px) {
- *         div {
- *             margin: 0 auto;
- *             width: auto;
- *         }
- *     }
+body {
+    background-color: #f0f0f2;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
+    "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+div {
+    width: 600px;
+    margin: 5em auto;
+    padding: 2em;
+    background-color: #fdfdff;
+    border-radius: 0.5em;
+    box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);
+}
+a:link, a:visited {
+    color: #38488f;
+    text-decoration: none;
+}
+@media (max - width : 700px) {
+    div {
+        margin: 0 auto;
+        width: auto;
+    }
+}
  */

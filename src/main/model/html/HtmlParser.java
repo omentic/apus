@@ -5,15 +5,18 @@ import java.util.*;
 import model.util.Node;
 import org.javatuples.*;
 
-/*
+/**
+ * This class represents the state of and implements an LL(1) HTML parser.
+ * For convenience, the following (defo wrong) context-free grammar for HTML is below.
+ * <br>
  * HTML ::= '<!DOCTYPE html>' (NODE)*
- * NODE ::= '<'TAG (' ' WORD '=' ('"'TEXT'"' | TEXT))* '>' (NODE)* '</' TAG '>'
- *         | '<'SINGLE_TAG (' ' WORD '=' ('"'TEXT'"' | TEXT))* ('>'|'/>')
+ * NODE ::= '<'TAG (' ' WORD '=' ('"'TEXT'"' | TEXT))* '>' (NODE)* '<\/' TAG '>'
+ *         | '<'SELF_CLOSING_TAG (' ' WORD '=' ('"'TEXT'"' | TEXT))* ('>'|'/>')
  *         | (TEXT | NODE)*
  * TEXT ::= UNICODE - {'"'} + {'\"'}
  * TAG ::= 'body' | 'div' | ...
- * SINGLE_TAG ::= 'img' | ...
- * (note that \forall T \in SINGLE_TAG, T \notin TAG)
+ * SELF_CLOSING_TAG ::= 'img' | ...
+ * (note that \forall T \in SELF_CLOSING_TAG, T \notin TAG)
  */
 public class HtmlParser {
 
@@ -216,16 +219,16 @@ public class HtmlParser {
      */
     private void caseValue(char c) {
         switch (c) {
-            case '\'':
-                state = ParserState.SINGLE_QUOTES;
+            case '\'': state = ParserState.SINGLE_QUOTES;
                 break;
-            case '\"':
-                state = ParserState.DOUBLE_QUOTES;
+            case '\"': state = ParserState.DOUBLE_QUOTES;
                 break;
             case ' ': case '\n':
+                state = ParserState.KEY;
                 currentAttributes.add(new Pair<>(currentKey, currentValue));
                 currentKey = "";
                 currentValue = "";
+                break; // THE FOOTGUN DESIGN STRIKES AGAIN
             case '>':
                 if (!currentKey.equals("") || !currentValue.equals("")) {
                     currentAttributes.add(new Pair<>(currentKey, currentValue));
@@ -251,7 +254,7 @@ public class HtmlParser {
                     state = ParserState.VALUE;
                     previousChar = '\0';
                 } else {
-                    currentValue = currentValue.substring(0, currentValue.length() - 2);
+                    currentValue = currentValue.substring(0, currentValue.length() - 1);
                     currentValue += c;
                     previousChar = c;
                 }
@@ -274,7 +277,7 @@ public class HtmlParser {
                     state = ParserState.VALUE;
                     previousChar = '\0';
                 } else {
-                    currentValue = currentValue.substring(0, currentValue.length() - 2);
+                    currentValue = currentValue.substring(0, currentValue.length() - 1);
                     currentValue += c;
                     previousChar = c;
                 }
