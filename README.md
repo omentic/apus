@@ -16,3 +16,8 @@ I've heard that Java Swing has a native HTML rendering component. I hope to enti
 - As a user, I want to be able to construct a structural representation of a CSS file.
 - As a user, I want to be able to add multiple Nodes to an HTML file.
 - As a user, I want to be able to open and render an arbitrary HTML file.
+
+## credits
+
+This project makes extensive use of the Javatuples library ([javatuples.org](https://www.javatuples.org/)).
+Many thanks to the author, Daniel Fernández.

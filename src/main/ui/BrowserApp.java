@@ -13,6 +13,7 @@ import java.util.*;
  */
 public class BrowserApp {
     private Scanner input;
+    private static final String border = "===============================================";
 
     /**
      * EFFECTS: Renders an arbitrary HTML page and arbitrary HTML input.
@@ -21,18 +22,30 @@ public class BrowserApp {
         println("apus: currently a barebones html/css renderer");
         println("please provide a path to a file (examples located in data/*):");
 
+        input = new Scanner(System.in);
         String pathString = input.next();
         Path path = Path.of(pathString);
         try {
             String file = Files.readString(path);
             HtmlParser parser = new HtmlParser();
+            println(border);
             renderHtml(parser.parseHtml(file));
-            println("Page rendered. Input raw HTML to add Nodes.");
-            parser = new HtmlParser();
-            String rawHtml = input.next();
-            renderHtml(parser.parseHtml(file + rawHtml));
+            println(border);
+            ArrayList<String> rawHtml = new ArrayList<>();
+            rawHtml.add(file);
+            while (true) {
+                println("Page rendered. Input additional raw HTML if desired.");
+                rawHtml.add(input.next());
+                println(border);
+                for (String s : rawHtml) {
+                    parser = new HtmlParser();
+                    renderHtml(parser.parseHtml(s));
+                }
+                println(border);
+            }
         } catch (Exception e) {
             println("Reading from the file failed with " + e.toString());
+            println("Please try again.");
         }
     }
 
