@@ -6,6 +6,9 @@ import org.javatuples.Pair;
 import java.util.ArrayList;
 import java.util.Optional;
 
+/**
+ * This ElementNode class represents an HTML tag and nested tags.
+ */
 public class ElementNode implements Node {
     private String tag;
     private ArrayList<Pair<String,String>> attributes;

@@ -1,8 +1,8 @@
 package model.util;
 
 /**
- * yeah there's nothing here
- * I just need to establish the inheritance relation of ElementNode and TextNode
+ * This Node represents an abstract relationship between ElementNode and TextNode.
+ * It's extremely helpful / necessary for Lists of arbitrary ElementNodes/TextNodes.
  */
 public interface Node {
     // Return a representation of the Node. Useful for debugging.

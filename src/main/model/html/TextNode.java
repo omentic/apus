@@ -2,6 +2,9 @@ package model.html;
 
 import model.util.Node;
 
+/**
+ * This TextNode class represents raw text, with no nested tags.
+ */
 public class TextNode implements Node {
     private String text = "";
 
