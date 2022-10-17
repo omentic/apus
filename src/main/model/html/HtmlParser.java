@@ -6,54 +6,6 @@ import model.util.Node;
 import org.javatuples.*;
 
 /*
-<!DOCTYPE html>
-<html>
-<head>
-	<title>j-james</title>
-	<meta charset="utf-8"/>
-	<meta name="viewport" content="width=device-width"/>
-	<link rel="icon" type="image/jpg" href="assets/compass.jpg"/>
-	<link rel="stylesheet" href="css/normalize.css"/>
-	<link rel="stylesheet" href="css/style.css"/>
-</head>
-<body>
-	<header>
-		<h1>
-			<a href="https://j-james.me">j-james</a>
-		</h1>
-		<nav>
-			<a href="https://j-james.me/about">about</a>
-			<a href="https://j-james.me/resume">resume</a>
-			<a href="https://j-james.me/posts">posts</a>
-			<a href="https://j-james.me/writeups">writeups</a>
-		</nav>
-	</header>
-	<main>
-	<div id="intro">
-		<img id="face" src="assets/compass.jpg"/>
-		<div id="profile">
-			<p> Hello, I'm JJ, and I go by j-james on the Internet. </p>
-			<p> I'm a second-year student at the <a href="https://ubc.ca">University of British Columbia</a>, flag hunter for <a href="https://ubcctf.github.io">Maple Bacon</a>, embedded programmer on <a href="https://ubcbionics.com/">UBC Bionics</a>, and occasional ultimate frisbee and roller/ice hockey player.</p>
-			<p> Outside of school, sports, and social life, I enjoy building and contributing to <a href="https://www.gnu.org/philosophy/free-sw">free-and-open-source</a> projects. The majority of my work can either be found on <a href="https://github.com/j-james">GitHub</a> or at <a href="https://sr.ht/~j-james">SourceHut</a>. </p>
-		</div>
-	</div>
-	<!-- <div id="details">
-		<h2>Projects</h2>
-		<p> Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
-		<h2>Posts</h2>
-		<p> Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
-	</div> -->
-	</main>
-	<footer>
-		<span><img src="assets/copyleft.svg" width="12" height="12"/> 2020-2022 j-james </span>
-	</footer>
-</body>
-</html>
-<!--
-
-*/
-
-/*
  * HTML ::= '<!DOCTYPE html>' (NODE)*
  * NODE ::= '<'TAG (' ' WORD '=' ('"'TEXT'"' | TEXT))* '>' (NODE)* '</' TAG '>'
  *         | '<'SINGLE_TAG (' ' WORD '=' ('"'TEXT'"' | TEXT))* ('>'|'/>')
@@ -66,7 +18,7 @@ import org.javatuples.*;
 public class HtmlParser {
 
     private enum ParserState {
-        HTML,
+        HTML, IGNORED,
         OPENING_TAG, KEY, VALUE,
         SINGLE_QUOTE, DOUBLE_QUOTE,
         UNKNOWN_TAG, CLOSING_TAG,
@@ -81,7 +33,7 @@ public class HtmlParser {
         var currentKey = "";
         var currentValue = "";
         var currentText = "";
-        var previousChar = '\0';
+        var previousChar = '\0'; // important for quote escapes, and multiple whitespace chars
 
         // We safely? assume to start outside of all nodes.
         ParserState state = ParserState.HTML;
@@ -101,10 +53,18 @@ public class HtmlParser {
                                     result.add(new TextNode(currentText));
                                 }
                                 currentText = "";
+                                previousChar = '\0';
                             }
                             break; // FOOTGUN LANGUAGE DESIGN
+                        case ' ': case '\n':
+                            if (previousChar != ' ') {
+                                currentText += ' ';
+                            }
+                            previousChar = ' ';
+                            break;
                         default:
                             currentText += c;
+                            previousChar = c;
                             break;
                     }
                     break;
@@ -118,20 +78,31 @@ public class HtmlParser {
                             currentText += "<>";
                             System.out.println("Why would you put <> in your HTML??? go away");
                             break;
-                        // Currently doesn't handle <!DOCTYPE> different from any other tag
-                        case '!': default:
+                        // For now, we'll straight-up ignore anything matching the <!...> syntax:
+                        // i.e. comments, and <!DOCTYPE html>
+                        case '!':
+                            state = ParserState.IGNORED;
+                            break;
+                        default:
                             state = ParserState.OPENING_TAG;
                             currentTag += c;
                             break;
                     }
                     break; // FOOTGUN LANGUAGE DESIGN STRIKES AGAIN
+                case IGNORED:
+                    switch (c) {
+                        case '>':
+                            state = ParserState.HTML;
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
                 case OPENING_TAG:
                     switch (c) {
                         case '>':
                             state = ParserState.HTML;
                             var node = new ElementNode(currentTag, currentAttributes);
-                            System.out.println("Adding ElementNode " + currentTag);
-                            System.out.println("Current size of unfinished: " + unfinished.size());
                             if (unfinished.size() != 0) {
                                 unfinished.getLast().addChild(node);
                                 unfinished.add(node);
@@ -174,8 +145,6 @@ public class HtmlParser {
                         case '>':
                             state = ParserState.HTML;
                             var node = new ElementNode(currentTag, currentAttributes);
-                            System.out.println("Adding ElementNode " + currentTag);
-                            System.out.println("Current size of unfinished: " + unfinished.size());
                             if (unfinished.size() != 0) {
                                 unfinished.getLast().addChild(node);
                                 unfinished.add(node);
@@ -216,8 +185,6 @@ public class HtmlParser {
                             }
                             state = ParserState.HTML;
                             var node = new ElementNode(currentTag, currentAttributes);
-                            System.out.println("Adding ElementNode " + currentTag);
-                            System.out.println("Current size of unfinished: " + unfinished.size());
                             if (unfinished.size() != 0) {
                                 unfinished.getLast().addChild(node);
                                 unfinished.add(node);
@@ -240,6 +207,7 @@ public class HtmlParser {
                                 state = ParserState.VALUE;
                                 previousChar = '\0';
                             } else {
+                                currentValue = currentValue.substring(0, currentValue.length() - 2);
                                 currentValue += c;
                                 previousChar = c;
                             }
@@ -257,6 +225,7 @@ public class HtmlParser {
                                 state = ParserState.VALUE;
                                 previousChar = '\0';
                             } else {
+                                currentValue = currentValue.substring(0, currentValue.length() - 2);
                                 currentValue += c;
                                 previousChar = c;
                             }
@@ -284,3 +253,60 @@ public class HtmlParser {
         }
     }
 }
+
+/*
+<!DOCTYPE html>
+<html>
+<head>
+	<title>j-james</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width"/>
+	<link rel="icon" type="image/jpg" href="assets/compass.jpg"/>
+	<link rel="stylesheet" href="css/normalize.css"/>
+	<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+	<header>
+		<h1>
+			<a href="https://j-james.me">j-james</a>
+		</h1>
+		<nav>
+			<a href="https://j-james.me/about">about</a>
+			<a href="https://j-james.me/resume">resume</a>
+			<a href="https://j-james.me/posts">posts</a>
+			<a href="https://j-james.me/writeups">writeups</a>
+		</nav>
+	</header>
+	<main>
+	<div id="intro">
+		<img id="face" src="assets/compass.jpg"/>
+	</div>
+	<!-- <div id="details">
+		<h2>Projects</h2>
+		<p> Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+		sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+		nisi ut aliquip ex ea commodo consequat.
+		Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+		dolore eu fugiat nulla pariatur.
+		Excepteur sint occaecat cupidatat non proident, sunt in culpa
+		qui officia deserunt mollit anim id est laborum. </p>
+		<h2>Posts</h2>
+		<p> Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+		sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+		nisi ut aliquip ex ea commodo consequat.
+		Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+		dolore eu fugiat nulla pariatur.
+		Excepteur sint occaecat cupidatat non proident, sunt in culpa
+		qui officia deserunt mollit anim id est laborum. </p>
+	</div> -->
+	</main>
+	<footer>
+		<span><img src="assets/copyleft.svg" width="12" height="12"/> 2020-2022 j-james </span>
+	</footer>
+</body>
+</html>
+<!--
+
+*/

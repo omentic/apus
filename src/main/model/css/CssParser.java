@@ -15,35 +15,6 @@ import java.util.*;
  * VALUE ::= ??? idk lol
  */
 
-/*
- *     body {
- *         background-color: #f0f0f2;
- *         margin: 0;
- *         padding: 0;
- *         font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
- *         "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
- *
- *     }
- *     div {
- *         width: 600px;
- *         margin: 5em auto;
- *         padding: 2em;
- *         background-color: #fdfdff;
- *         border-radius: 0.5em;
- *         box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);
- *     }
- *     a:link, a:visited {
- *         color: #38488f;
- *         text-decoration: none;
- *     }
- *     @media (max - width : 700px) {
- *         div {
- *             margin: 0 auto;
- *             width: auto;
- *         }
- *     }
- */
-
 /**
  * This class assumes that it is getting _valid CSS_: that is, the style between two tags
  * of a style block, or the raw content of a .css file.
@@ -75,6 +46,7 @@ public class CssParser {
         var currentRule = new ArrayList<Pair<String, String>>();
         var currentProperty = "";
         var currentValue = "";
+        var previousChar = '\0';
 
         // We safely assume to start by reading a selector.
         ParserState state = ParserState.SELECTORS;
@@ -178,8 +150,15 @@ public class CssParser {
                 case SINGLE_QUOTES:
                     switch (c) {
                         case '\'':
-                            state = ParserState.VALUE;
-                            currentValue += c;
+                            if (previousChar != '\\') {
+                                state = ParserState.VALUE;
+                                currentValue += c;
+                                previousChar = '\0';
+                            } else {
+                                currentValue = currentValue.substring(0, currentValue.length() - 2);
+                                currentValue += c;
+                                previousChar = c;
+                            }
                             break;
                         default:
                             currentValue += c;
@@ -189,8 +168,15 @@ public class CssParser {
                 case DOUBLE_QUOTES:
                     switch (c) {
                         case '\"':
-                            state = ParserState.VALUE;
-                            currentValue += c;
+                            if (previousChar != '\\') {
+                                state = ParserState.VALUE;
+                                currentValue += c;
+                                previousChar = '\0';
+                            } else {
+                                currentValue = currentValue.substring(0, currentValue.length() - 2);
+                                currentValue += c;
+                                previousChar = c;
+                            }
                             break;
                         default:
                             currentValue += c;
@@ -245,3 +231,32 @@ public class CssParser {
         }
     }
 }
+
+/*
+ *     body {
+ *         background-color: #f0f0f2;
+ *         margin: 0;
+ *         padding: 0;
+ *         font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
+ *         "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+ *
+ *     }
+ *     div {
+ *         width: 600px;
+ *         margin: 5em auto;
+ *         padding: 2em;
+ *         background-color: #fdfdff;
+ *         border-radius: 0.5em;
+ *         box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);
+ *     }
+ *     a:link, a:visited {
+ *         color: #38488f;
+ *         text-decoration: none;
+ *     }
+ *     @media (max - width : 700px) {
+ *         div {
+ *             margin: 0 auto;
+ *             width: auto;
+ *         }
+ *     }
+ */
