@@ -5,14 +5,19 @@ import model.util.Node;
 public class TextNode implements Node {
     private String text = "";
 
-    public String getText() {
-        return this.text;
-    }
-
+    /**
+     * EFFECTS: Creates a new TextNode from the provided String value.
+     * MODIFIES: this
+     */
     public TextNode(String text) {
         this.text = text;
     }
 
+    public String getText() {
+        return this.text;
+    }
+
+    // We implement this method for easy debugging.
     public String getData() {
         return getText();
     }

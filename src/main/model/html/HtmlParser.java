@@ -17,229 +17,317 @@ import org.javatuples.*;
  */
 public class HtmlParser {
 
+    /**
+     * HTML is not nice to parse. We manage to get away with a relatively small number of parser states regardless.
+     */
     private enum ParserState {
         HTML, IGNORED,
-        OPENING_TAG, KEY, VALUE,
-        SINGLE_QUOTE, DOUBLE_QUOTE,
+        OPENING_TAG, KEY, VALUE, // TAG::OPENING_TAG, TAG::KEY, TAG::VALUE
+        SINGLE_QUOTES, DOUBLE_QUOTES, // VALUE::SINGLE_QUOTES, VALUE::DOUBLE_QUOTES
         UNKNOWN_TAG, CLOSING_TAG,
     }
 
-    public static ArrayList<Node> parseHtmlLL(String input) {
+    // HTML documents are uniquely a list of Nodes rather than a Node themselves
+    private ArrayList<Node> result;
+    // a bunch of useful buffers. see CssParser for commentary.
+    private ArrayDeque<ElementNode> unfinished;
+    private String currentTag;
+    private ArrayList<Pair<String, String>> currentAttributes;
+    private String currentKey;
+    private String currentValue;
+    private String currentText;
+    // important for quote escapes, and multiple whitespace chars
+    private char previousChar;
 
-        var result = new ArrayList<Node>();
-        var unfinished = new ArrayDeque<ElementNode>();
-        var currentTag = "";
-        var currentAttributes = new ArrayList<Pair<String, String>>();
-        var currentKey = "";
-        var currentValue = "";
-        var currentText = "";
-        var previousChar = '\0'; // important for quote escapes, and multiple whitespace chars
+    private ParserState state;
+
+    public HtmlParser() {
+        result = new ArrayList<>();
+        unfinished = new ArrayDeque<>();
+        currentTag = "";
+        currentAttributes = new ArrayList<>();
+        currentKey = "";
+        currentValue = "";
+        currentText = "";
+        previousChar = '\0';
 
         // We safely? assume to start outside of all nodes.
-        ParserState state = ParserState.HTML;
+        state = ParserState.HTML;
+    }
+
+    public ArrayList<Node> parseHtml(String input) {
 
         for (char c : input.toCharArray()) {
             // System.out.print(state);
             // System.out.println(" " + c + " " + currentText);
             switch (state) {
-                case HTML:
-                    switch (c) {
-                        case '<':
-                            state = ParserState.UNKNOWN_TAG;
-                            if (!currentText.equals("")) {
-                                if (unfinished.size() != 0) {
-                                    unfinished.getLast().addChild(new TextNode(currentText));
-                                } else {
-                                    result.add(new TextNode(currentText));
-                                }
-                                currentText = "";
-                                previousChar = '\0';
-                            }
-                            break; // FOOTGUN LANGUAGE DESIGN
-                        case ' ': case '\n':
-                            if (previousChar != ' ') {
-                                currentText += ' ';
-                            }
-                            previousChar = ' ';
-                            break;
-                        default:
-                            currentText += c;
-                            previousChar = c;
-                            break;
-                    }
+                case HTML: caseHtml(c);
                     break;
-                case UNKNOWN_TAG:
-                    switch (c) {
-                        case '/':
-                            state = ParserState.CLOSING_TAG;
-                            break;
-                        case '>': // Why would you put <> in your HTML??? go away
-                            state = ParserState.HTML;
-                            currentText += "<>";
-                            System.out.println("Why would you put <> in your HTML??? go away");
-                            break;
-                        // For now, we'll straight-up ignore anything matching the <!...> syntax:
-                        // i.e. comments, and <!DOCTYPE html>
-                        case '!':
-                            state = ParserState.IGNORED;
-                            break;
-                        default:
-                            state = ParserState.OPENING_TAG;
-                            currentTag += c;
-                            break;
-                    }
+                case UNKNOWN_TAG: caseUnknownTag(c);
                     break; // FOOTGUN LANGUAGE DESIGN STRIKES AGAIN
-                case IGNORED:
-                    switch (c) {
-                        case '>':
-                            state = ParserState.HTML;
-                            break;
-                        default:
-                            break;
-                    }
+                case IGNORED: caseIgnored(c);
                     break;
-                case OPENING_TAG:
-                    switch (c) {
-                        case '>':
-                            state = ParserState.HTML;
-                            var node = new ElementNode(currentTag, currentAttributes);
-                            if (unfinished.size() != 0) {
-                                unfinished.getLast().addChild(node);
-                                unfinished.add(node);
-                            } else {
-                                result.add(node);
-                                unfinished.add((ElementNode) result.get(result.size() - 1));
-                            }
-                            currentTag = "";
-                            currentAttributes = new ArrayList<>();
-                            break;
-                        case ' ': case '\n':
-                            state = ParserState.KEY;
-                            break;
-                        default:
-                            currentTag += c;
-                            break;
-                    }
+                case OPENING_TAG: caseOpeningTag(c);
                     break;
-                case CLOSING_TAG:
-                    switch (c) {
-                        case '>':
-                            state = ParserState.HTML;
-                            // IMPORTANT: we don't validate that closing tags correspond to an open tag
-                            if (!isSelfClosingTag(currentTag)) {
-                                if (unfinished.size() != 0) {
-                                    unfinished.removeLast();
-                                }
-                            }
-                            currentTag = "";
-                            break;
-                        case ' ': case '\n':
-                            break;
-                        default:
-                            currentTag += c;
-                            break;
-                    }
+                case CLOSING_TAG: caseClosingTag(c);
                     break;
-                case KEY:
-                    switch (c) {
-                        case '>':
-                            state = ParserState.HTML;
-                            var node = new ElementNode(currentTag, currentAttributes);
-                            if (unfinished.size() != 0) {
-                                unfinished.getLast().addChild(node);
-                                unfinished.add(node);
-                            } else {
-                                result.add(node);
-                                unfinished.add((ElementNode) result.get(result.size() - 1));
-                            }
-                            currentTag = "";
-                            currentAttributes = new ArrayList<>();
-                            break;
-                        case '=':
-                            state = ParserState.VALUE;
-                            break;
-                        case ' ': case '\n':
-                            break;
-                        default:
-                            currentKey += c;
-                            break;
-                    }
+                case KEY: caseKey(c);
                     break;
-                case VALUE:
-                    switch (c) {
-                        case '\'':
-                            state = ParserState.SINGLE_QUOTE;
-                            break;
-                        case '\"':
-                            state = ParserState.DOUBLE_QUOTE;
-                            break;
-                        case ' ': case '\n':
-                            currentAttributes.add(new Pair<>(currentKey, currentValue));
-                            currentKey = "";
-                            currentValue = "";
-                        case '>':
-                            if (!currentKey.equals("") || !currentValue.equals("")) {
-                                currentAttributes.add(new Pair<>(currentKey, currentValue));
-                                currentKey = "";
-                                currentValue = "";
-                            }
-                            state = ParserState.HTML;
-                            var node = new ElementNode(currentTag, currentAttributes);
-                            if (unfinished.size() != 0) {
-                                unfinished.getLast().addChild(node);
-                                unfinished.add(node);
-                            } else {
-                                result.add(node);
-                                unfinished.add((ElementNode) result.get(result.size() - 1));
-                            }
-                            currentTag = "";
-                            currentAttributes = new ArrayList<>();
-                            break;
-                        default:
-                            currentValue += c;
-                            break;
-                    }
+                case VALUE: caseValue(c);
                     break;
-                case SINGLE_QUOTE:
-                    switch (c) {
-                        case '\'':
-                            if (previousChar != '\\') {
-                                state = ParserState.VALUE;
-                                previousChar = '\0';
-                            } else {
-                                currentValue = currentValue.substring(0, currentValue.length() - 2);
-                                currentValue += c;
-                                previousChar = c;
-                            }
-                            break;
-                        default:
-                            currentValue += c;
-                            previousChar = c;
-                            break;
-                    }
+                case SINGLE_QUOTES: caseSingleQuotes(c);
                     break;
-                case DOUBLE_QUOTE:
-                    switch (c) {
-                        case '\"':
-                            if (previousChar != '\\') {
-                                state = ParserState.VALUE;
-                                previousChar = '\0';
-                            } else {
-                                currentValue = currentValue.substring(0, currentValue.length() - 2);
-                                currentValue += c;
-                                previousChar = c;
-                            }
-                        default:
-                            currentValue += c;
-                            previousChar = c;
-                            break;
-                    }
+                case DOUBLE_QUOTES: caseDoubleQuotes(c);
                     break;
             }
         }
         return result;
     }
 
+    /**
+     * EFFECTS: Handles and updates parser state/buffers for a single character while in the HTML state.
+     * MODIFIES: this
+     */
+    private void caseHtml(char c) {
+        switch (c) {
+            case '<':
+                state = ParserState.UNKNOWN_TAG;
+                if (!currentText.equals("")) {
+                    addNewTextNode();
+                }
+                break; // FOOTGUN LANGUAGE DESIGN
+            case ' ': case '\n':
+                if (previousChar != ' ') {
+                    currentText += ' ';
+                }
+                previousChar = ' ';
+                break;
+            default:
+                currentText += c;
+                previousChar = c;
+                break;
+        }
+    }
+
+    /**
+     * EFFECTS: Handles and updates parser state/buffers for a single character while in the UNKNOWN_TAG state.
+     * MODIFIES: this
+     */
+    private void caseUnknownTag(char c) {
+        switch (c) {
+            case '/':
+                state = ParserState.CLOSING_TAG;
+                break;
+            case '>': // Why would you put <> in your HTML??? go away
+                state = ParserState.HTML;
+                currentText += "<>";
+                break;
+            // For now, we'll straight-up ignore anything matching the <!...> syntax:
+            // i.e. comments, and <!DOCTYPE html>
+            case '!':
+                state = ParserState.IGNORED;
+                break;
+            default:
+                state = ParserState.OPENING_TAG;
+                currentTag += c;
+                break;
+        }
+    }
+
+    /**
+     * EFFECTS: Handles and updates parser state/buffers for a single character while in the IGNORED state.
+     * MODIFIES: this
+     */
+    private void caseIgnored(char c) {
+        switch (c) {
+            case '>':
+                state = ParserState.HTML;
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * EFFECTS: Handles and updates parser state/buffers for a single character while in the OPENING_TAG state.
+     * MODIFIES: this
+     */
+    private void caseOpeningTag(char c) {
+        switch (c) {
+            case '>':
+                addNewElementNode();
+                break;
+            case ' ': case '\n':
+                state = ParserState.KEY;
+                break;
+            default:
+                currentTag += c;
+                break;
+        }
+    }
+
+    /**
+     * EFFECTS: Handles and updates parser state/buffers for a single character while in the CLOSING_TAG state.
+     * MODIFIES: this
+     */
+    private void caseClosingTag(char c) {
+        switch (c) {
+            case '>':
+                state = ParserState.HTML;
+                // IMPORTANT: we don't validate that closing tags correspond to an open tag
+                if (!isSelfClosingTag(currentTag)) {
+                    if (unfinished.size() != 0) {
+                        unfinished.removeLast();
+                    }
+                }
+                currentTag = "";
+                break;
+            case ' ': case '\n':
+                break;
+            default:
+                currentTag += c;
+                break;
+        }
+    }
+
+    /**
+     * EFFECTS: Handles and updates parser state/buffers for a single character while in the KEY state.
+     * MODIFIES: this
+     */
+    private void caseKey(char c) {
+        switch (c) {
+            case '>':
+                addNewElementNode();
+                break;
+            case '=':
+                state = ParserState.VALUE;
+                break;
+            case ' ': case '\n':
+                break;
+            default:
+                currentKey += c;
+                break;
+        }
+    }
+
+    /**
+     * EFFECTS: Handles and updates parser state/buffers for a single character while in the VALUE state.
+     * MODIFIES: this
+     */
+    private void caseValue(char c) {
+        switch (c) {
+            case '\'':
+                state = ParserState.SINGLE_QUOTES;
+                break;
+            case '\"':
+                state = ParserState.DOUBLE_QUOTES;
+                break;
+            case ' ': case '\n':
+                currentAttributes.add(new Pair<>(currentKey, currentValue));
+                currentKey = "";
+                currentValue = "";
+            case '>':
+                if (!currentKey.equals("") || !currentValue.equals("")) {
+                    currentAttributes.add(new Pair<>(currentKey, currentValue));
+                    currentKey = "";
+                    currentValue = "";
+                }
+                addNewElementNode();
+                break;
+            default:
+                currentValue += c;
+                break;
+        }
+    }
+
+    /**
+     * EFFECTS: Handles and updates parser state/buffers for a single character while in the SINGLE_QUOTES state.
+     * MODIFIES: this
+     */
+    private void caseSingleQuotes(char c) {
+        switch (c) {
+            case '\'':
+                if (previousChar != '\\') {
+                    state = ParserState.VALUE;
+                    previousChar = '\0';
+                } else {
+                    currentValue = currentValue.substring(0, currentValue.length() - 2);
+                    currentValue += c;
+                    previousChar = c;
+                }
+                break;
+            default:
+                currentValue += c;
+                previousChar = c;
+                break;
+        }
+    }
+
+    /**
+     * EFFECTS: Handles and updates parser state/buffers for a single character while in the DOUBLE_QUOTES state.
+     * MODIFIES: this
+     */
+    private void caseDoubleQuotes(char c) {
+        switch (c) {
+            case '\"':
+                if (previousChar != '\\') {
+                    state = ParserState.VALUE;
+                    previousChar = '\0';
+                } else {
+                    currentValue = currentValue.substring(0, currentValue.length() - 2);
+                    currentValue += c;
+                    previousChar = c;
+                }
+                break; // FOOTGUN LANGUAGE DESIGN
+            default:
+                currentValue += c;
+                previousChar = c;
+                break;
+        }
+    }
+
+    /**
+     * Helper function to remove code duplication.
+     * EFFECTS: Creates and adds a new ElementNode from the current buffers to the unfinished and result stacks
+     * MODIFIES: this
+     */
+    private void addNewElementNode() {
+        state = ParserState.HTML;
+        var node = new ElementNode(currentTag, currentAttributes);
+        if (unfinished.size() != 0) {
+            unfinished.getLast().addChild(node);
+            if (!isSelfClosingTag(currentTag)) {
+                unfinished.add(node);
+            }
+        } else {
+            result.add(node);
+            if (!isSelfClosingTag(currentTag)) {
+                unfinished.add((ElementNode) result.get(result.size() - 1));
+            }
+        }
+        currentTag = "";
+        currentAttributes = new ArrayList<>();
+    }
+
+    /**
+     * Helper function to check method length boxes.
+     * EFFECTS: Creates and adds a new TextNode from the current buffers to the unfinished and result stacks
+     * MODIFIES: this
+     */
+    private void addNewTextNode() {
+        if (unfinished.size() != 0) {
+            unfinished.getLast().addChild(new TextNode(currentText));
+        } else {
+            result.add(new TextNode(currentText));
+        }
+        currentText = "";
+        previousChar = '\0';
+    }
+
+    /**
+     * Simple helper function to check if a tag is self-closing.
+     * EFFECTS: Returns whether a String tag is a self-closing tag.
+     */
     private static boolean isSelfClosingTag(String tag) {
         switch (tag) {
             case "input": case "param":
@@ -281,7 +369,7 @@ public class HtmlParser {
 	<div id="intro">
 		<img id="face" src="assets/compass.jpg"/>
 	</div>
-	<!-- <div id="details">
+	<div id="details">
 		<h2>Projects</h2>
 		<p> Lorem ipsum dolor sit amet, consectetur adipiscing elit,
 		sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -291,7 +379,7 @@ public class HtmlParser {
 		dolore eu fugiat nulla pariatur.
 		Excepteur sint occaecat cupidatat non proident, sunt in culpa
 		qui officia deserunt mollit anim id est laborum. </p>
-		<h2>Posts</h2>
+		<!-- <h2>Posts</h2>
 		<p> Lorem ipsum dolor sit amet, consectetur adipiscing elit,
 		sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 		Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
@@ -299,14 +387,12 @@ public class HtmlParser {
 		Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
 		dolore eu fugiat nulla pariatur.
 		Excepteur sint occaecat cupidatat non proident, sunt in culpa
-		qui officia deserunt mollit anim id est laborum. </p>
-	</div> -->
+		qui officia deserunt mollit anim id est laborum. </p> -->
+	</div>
 	</main>
 	<footer>
 		<span><img src="assets/copyleft.svg" width="12" height="12"/> 2020-2022 j-james </span>
 	</footer>
 </body>
 </html>
-<!--
-
 */
