@@ -33,19 +33,27 @@ public class BrowserApp {
             println(border);
             ArrayList<String> rawHtml = new ArrayList<>();
             rawHtml.add(file);
-            while (true) {
-                println("Page rendered. Input additional raw HTML if desired.");
-                rawHtml.add(input.next());
-                println(border);
-                for (String s : rawHtml) {
-                    parser = new HtmlParser();
-                    renderHtml(parser.parseHtml(s));
-                }
-                println(border);
-            }
+            mainLoop(rawHtml, border, parser);
         } catch (Exception e) {
             println("Reading from the file failed with " + e.toString());
             println("Please try again.");
+        }
+    }
+
+
+    /**
+     * EFFECTS: Runs the main loop
+     */
+    private void mainLoop(ArrayList<String> rawHtml, String border, HtmlParser parser) {
+        while (true) {
+            println("Page rendered. Input additional raw HTML if desired.");
+            rawHtml.add(input.next());
+            println(border);
+            for (String s : rawHtml) {
+                parser = new HtmlParser();
+                renderHtml(parser.parseHtml(s));
+            }
+            println(border);
         }
     }
 
