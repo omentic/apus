@@ -296,7 +296,7 @@ public class HtmlParser {
      */
     private void addNewElementNode() {
         state = ParserState.HTML;
-        var node = new ElementNode(currentTag, currentAttributes);
+        ElementNode node = new ElementNode(currentTag, currentAttributes);
         if (unfinished.size() != 0) {
             unfinished.getLast().addChild(node);
             if (!isSelfClosingTag(currentTag)) {

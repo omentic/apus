@@ -79,7 +79,7 @@ public class HtmlParserTest {
         expectedAttributes.add(new Pair<>("up", "do'wn"));
 
         HtmlParser parser = new HtmlParser();
-        var parsed = parser.parseHtml(attributesHtml);
+        ArrayList<Node> parsed = parser.parseHtml(attributesHtml);
         displayHtmlTree(parsed);
         assertEqualsHtml(parsed, expected);
     }

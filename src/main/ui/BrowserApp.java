@@ -24,9 +24,9 @@ public class BrowserApp {
 
         input = new Scanner(System.in);
         String pathString = input.next();
-        Path path = Path.of(pathString);
+        Path path = Paths.get(pathString);
         try {
-            String file = Files.readString(path);
+            String file = new String(Files.readAllBytes(path));
             HtmlParser parser = new HtmlParser();
             println(border);
             renderHtml(parser.parseHtml(file));
