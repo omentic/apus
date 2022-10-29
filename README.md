@@ -14,8 +14,11 @@ I've heard that Java Swing has a native HTML rendering component. I hope to enti
 
 - As a user, I want to be able to construct a structural representation of an HTML file.
 - As a user, I want to be able to construct a structural representation of a CSS file.
-- As a user, I want to be able to add multiple Nodes to an HTML file.
-- As a user, I want to be able to open and render an arbitrary HTML file.
+- As a user, I want to be able to add multiple tabs to a list of open tabs.
+- As a user, I want to be able to view a rendering of an arbitrary HTML file.
+
+- As a user, I want to be given the option to save my currently open tabs to disk when quitting.
+- As a user, I want to be given the option to restore my previous tabs upon relaunching the application.
 
 ## credits
 

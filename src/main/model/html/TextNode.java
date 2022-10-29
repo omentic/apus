@@ -1,11 +1,13 @@
 package model.html;
 
 import model.util.Node;
+import org.json.JSONObject;
+import persistance.JsonAble;
 
 /**
  * This TextNode class represents raw text, with no nested tags.
  */
-public class TextNode implements Node {
+public class TextNode implements Node, JsonAble {
     private String text = "";
 
     /**
@@ -23,5 +25,10 @@ public class TextNode implements Node {
     // We implement this method for easy debugging.
     public String getData() {
         return getText();
+    }
+
+    @Override
+    public JSONObject serialize() {
+        return new JSONObject(this);
     }
 }

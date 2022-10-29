@@ -2,6 +2,8 @@ package model.html;
 
 import model.util.Node;
 import org.javatuples.Pair;
+import org.json.JSONObject;
+import persistance.JsonAble;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -9,7 +11,7 @@ import java.util.Optional;
 /**
  * This ElementNode class represents an HTML tag and nested tags.
  */
-public class ElementNode implements Node {
+public class ElementNode implements Node, JsonAble {
     private String tag;
     private ArrayList<Pair<String,String>> attributes;
 
@@ -66,5 +68,10 @@ public class ElementNode implements Node {
     // We implement this method for easy debugging.
     public String getData() {
         return getTag() + " " + getAttributes().toString();
+    }
+
+    @Override
+    public JSONObject serialize() {
+        return new JSONObject(this);
     }
 }
