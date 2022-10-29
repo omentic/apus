@@ -29,11 +29,13 @@ public class JsonUtils {
      * REQUIRES: a path to a valid file containing JSONObject-serialized data
      * EFFECTS: reads a serialized String into a JSONObject
      */
-    public static JSONArray readFromFile(String path) {
+    public static JSONArray readFromFile(String pathString) {
         String content;
         JSONArray deread;
+        Path path;
         try {
-            content = Files.readString(Paths.get(path));
+            path = Paths.get(pathString);
+            content = new String(Files.readAllBytes(path));
             deread = new JSONArray(content);
         } catch (Exception e) {
             System.out.println("Read from file failed with %s");
