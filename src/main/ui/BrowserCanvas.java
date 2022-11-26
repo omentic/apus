@@ -29,7 +29,7 @@ public class BrowserCanvas extends JPanel {
     private void renderHtml(ArrayList<Node> html, Graphics g, Point location) {
         for (Node node : html) {
             if (node instanceof TextNode) {
-                if (!node.getData().isBlank()) {
+                if (node.getData().length() > 5) {
                     g.drawString(node.getData(), location.x, location.y);
                     location.translate(0, 20);
                 }

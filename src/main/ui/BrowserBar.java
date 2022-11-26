@@ -18,13 +18,10 @@ public class BrowserBar extends JToolBar {
     public BrowserBar(BrowserWindow parent) {
         this.parent = parent;
 
-        var test = new JMenuItem("Ipsum");
         tabMenu = new JPopupMenu("Tabs");
         tabMenu.add(new JMenuItem("Hello"));
         tabMenu.add(new JMenuItem("World"));
         tabMenu.add(new JMenuItem("Lorem"));
-        tabMenu.add(test);
-        tabMenu.remove(test);
 
         tabButton = new JToggleButton("Tabs");
         tabButton.addActionListener(toggleTabMenu());
