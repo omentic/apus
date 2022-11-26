@@ -20,6 +20,15 @@ I've heard that Java Swing has a native HTML rendering component. I hope to enti
 - As a user, I want to be given the option to save my currently open tabs to disk when quitting.
 - As a user, I want to be given the option to restore my previous tabs upon relaunching the application.
 
+## instructions for grader
+
+- You can generate the first required event of adding multiple Xs to a Y by creating a new tab by entering a path into the browser bar and pressing "Go". Observe that the tab is added to the tablist.
+- You can generate the second required event of adding multiple Xs to a Y by creating a new tab by opening the tab menu, selecting a tab, and closing it. Observe that the tab is removed from the tablist.
+- The panel in which all of the Xs added to a Y are displayed is the tablist.
+- You can locate my visual component by observing the main browser window, which may render arbitrary paths and open tabs.
+- You can save the state of my application by attempting to close it with tabs open. You will be asked if you would like to save your tabs.
+- You can load the state of my application by attempting to open it after saving tabs. You will be asked if you would like to restore your tabs.
+
 ## credits
 
 This project makes extensive use of the Javatuples library ([javatuples.org](https://www.javatuples.org/)).
