@@ -1,6 +1,5 @@
 package model.html;
 
-import model.util.Node;
 import org.json.JSONObject;
 import persistance.JsonAble;
 

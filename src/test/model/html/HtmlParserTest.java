@@ -1,9 +1,5 @@
 package model.html;
 
-import model.html.ElementNode;
-import model.html.HtmlParser;
-import model.html.TextNode;
-import model.util.Node;
 import org.javatuples.Pair;
 import org.junit.jupiter.api.Test;
 

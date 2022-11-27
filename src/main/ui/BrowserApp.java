@@ -3,7 +3,7 @@ package ui;
 import model.html.ElementNode;
 import model.html.HtmlParser;
 import model.html.TextNode;
-import model.util.Node;
+import model.html.Node;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import persistance.JsonUtils;

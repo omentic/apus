@@ -2,7 +2,6 @@ package model.html;
 
 import java.util.*;
 
-import model.util.Node;
 import org.javatuples.*;
 import org.json.JSONObject;
 import persistance.JsonAble;

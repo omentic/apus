@@ -2,7 +2,7 @@ package ui;
 
 import model.html.ElementNode;
 import model.html.TextNode;
-import model.util.Node;
+import model.html.Node;
 
 import javax.swing.*;
 import java.awt.*;

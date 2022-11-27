@@ -1,12 +1,10 @@
 package model.html;
 
-import model.util.Node;
 import org.javatuples.Pair;
 import org.json.JSONObject;
 import persistance.JsonAble;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 /**
  * This ElementNode class represents an HTML tag and nested tags.
