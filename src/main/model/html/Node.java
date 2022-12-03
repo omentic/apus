@@ -10,5 +10,6 @@ public interface Node {
     // Return a representation of the Node. Useful for debugging.
     public String getData();
 
+    // EFFECTS: returns a serialized form of the data
     public JSONObject serialize();
 }

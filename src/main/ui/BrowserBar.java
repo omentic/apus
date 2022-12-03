@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
 
+// BrowserBar
 public class BrowserBar extends JToolBar {
     private BrowserWindow parent;
 

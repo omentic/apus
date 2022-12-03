@@ -6,6 +6,7 @@ import model.html.Node;
 // https://drafts.csswg.org/css-flexbox/#layout-algorithm
 public class FlexLayout extends Layout {
 
+    // Constructs a new FlexLayout
     public FlexLayout(Node node, Layout parent) {
         super(node, parent);
     }

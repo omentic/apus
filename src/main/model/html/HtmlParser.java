@@ -45,6 +45,8 @@ public class HtmlParser implements JsonAble {
 
     private ParserState state;
 
+    // EFFECTS: constructs a new HTML parser.
+    // MODIFIES: this
     public HtmlParser() {
         result = new ArrayList<>();
         unfinished = new ArrayDeque<>();

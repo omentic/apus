@@ -18,6 +18,7 @@ public class BrowserCanvas extends JPanel {
         this.html = html;
     }
 
+    // EFFECTS: paints a component onto a canvas
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);

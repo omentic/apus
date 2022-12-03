@@ -6,6 +6,7 @@ import model.html.Node;
 import java.awt.*;
 import java.util.*;
 
+// Generic Layout class
 public abstract class Layout {
     private Point location;
     private Dimension dimension;
@@ -30,6 +31,8 @@ public abstract class Layout {
     // the big function
     public abstract void layout();
 
+    // MODIFIES: this
+    // EFFECTS: recursively constructs the layout tree
     public Layout(Node node, Layout parent) {
         this.associatedNode = node;
 
@@ -44,6 +47,8 @@ public abstract class Layout {
 
     // eh, probably the best place to put this
     // parent MAY BE nil: a handy call to Optional.ofNullable allows this
+    // MODIFIES: this
+    // EFFECTS: recursively constructs the layout tree
     public static ArrayList<Layout> constructTree(ArrayList<Node> html, Layout parent) {
         ArrayDeque<Layout> result = new ArrayDeque<>();
         for (Node node : html) {
@@ -69,6 +74,8 @@ public abstract class Layout {
         return new ArrayList<>(result); // haha
     }
 
+    // MODIFIES: this
+    // EFFECTS: recursively constructs the layout tree
     public static DocumentLayout constructTree(ArrayList<Node> html) {
         DocumentLayout result = new DocumentLayout();
         result.setChildren(constructTree(html, result));

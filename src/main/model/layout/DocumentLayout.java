@@ -2,6 +2,7 @@ package model.layout;
 
 import java.awt.*;
 
+// root document layout style
 public class DocumentLayout extends Layout {
 
     /*
@@ -13,6 +14,8 @@ public class DocumentLayout extends Layout {
         super(null, null);
     }
 
+    // MODIFIES: this
+    // EFFECTS: recursively constructs the layout tree
     public void layout() {
         this.setLocation(new Point(0, 0));
         this.setDimension(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
