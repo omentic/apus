@@ -42,7 +42,10 @@ Removed tab /home/apropos/Projects/website/j-james/index.html from tablist
 
 ## Phase IV: Task 3
 
-
+I think that the design structure shown by the UML diagram is overall pretty much fine, especially for a student project.
+There are definitely some problems with it / things I'd do differently, however:
+- The BrowserBar and BrowserCanvas have a mutual dependency with BrowserWindow: this doesn't make too much sense and was done because I needed to access BrowserWindow methods from within them. If I did it again, I would either nest the classes or use the Singleton design principle.
+- The CssParser is not connected to anything else, as it went unused. I would like to use that class in the future - but I never fully finished implementing the HTML layout, so it didn't make sense to apply CSS. (The JsonUtils class is also unconnected, but that's just because it consists of only static methods.)
 
 ## credits
 
