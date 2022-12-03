@@ -1,6 +1,9 @@
 package ui;
 
+import model.BrowserState;
 import model.html.HtmlParser;
+import model.util.Event;
+import model.util.EventLog;
 import org.json.JSONArray;
 import persistance.JsonUtils;
 
@@ -24,14 +27,14 @@ public class BrowserWindow extends JFrame {
     private BrowserCanvas canvas;
     private BrowserBar browserBar;
 
-    private ArrayDeque<String> tabs;
-    private String pathString;
+    private BrowserState state;
 
     // MODIFIES: this
     // EFFECTS: creates a new BrowserWindow program for rendering pages
     public BrowserWindow() {
         super("apus");
-        tabs = new ArrayDeque<>();
+        state = new BrowserState(new ArrayDeque<>(), "");
+
         canvas = new BrowserCanvas(new ArrayList<>());
 //        render("data/example.html");
         browserBar = new BrowserBar(this);
@@ -50,11 +53,11 @@ public class BrowserWindow extends JFrame {
     // MODIFIES: this
     // EFFECTS: Renders an arbitrary page
     public void render(String uri) {
-        pathString = uri;
+        state.setCurrentTab(uri);
         remove(canvas);
-        System.out.println(pathString);
+//        System.out.println(state.getCurrentTab());
         try {
-            Path path = Paths.get(pathString);
+            Path path = Paths.get(state.getCurrentTab());
             String file = new String(Files.readAllBytes(path));
             HtmlParser parser = new HtmlParser();
             canvas = new BrowserCanvas(parser.parseHtml(file));
@@ -73,8 +76,11 @@ public class BrowserWindow extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (tabs.size() > 0) {
+                if (state.getTabs().size() > 0) {
                     saveCurrentTabs();
+                }
+                for (Event event : EventLog.getInstance()) {
+                    System.out.println(event);
                 }
                 super.windowClosing(e);
             }
@@ -100,7 +106,7 @@ public class BrowserWindow extends JFrame {
                 JSONArray state = JsonUtils.readFromFile(storagePath);
                 for (int i = 0; i < state.length(); i++) {
                     this.browserBar.addTab((String) state.get(i));
-                    this.addTab((String) state.get(i));
+                    this.state.addTab((String) state.get(i));
                 }
             } catch (Exception e) {
                 System.out.println("Restoring state from disk failed with " + e.toString());
@@ -115,25 +121,13 @@ public class BrowserWindow extends JFrame {
                 JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
                 null, new String[]{"Yes", "No"}, "Yes");
         if (answer == 0) {
-            JsonUtils.writeToFile(new JSONArray(tabs), storagePath);
+            JsonUtils.writeToFile(new JSONArray(state.getTabs()), storagePath);
         } else {
             JsonUtils.writeToFile(new JSONArray(), storagePath);
         }
     }
 
-    public ArrayDeque<String> getTabs() {
-        return tabs;
-    }
-
-    // MODIFIES: this
-    // EFFECTS: add a tab
-    public void addTab(String tab) {
-        this.tabs.add(tab);
-    }
-
-    // MODIFIES: this
-    // EFFECTS: remove a tab
-    public void removeTab(String tab) {
-        this.tabs.remove(tab);
+    public BrowserState getBrowserState() {
+        return this.state;
     }
 }

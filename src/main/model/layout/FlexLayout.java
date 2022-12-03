@@ -12,6 +12,5 @@ public class FlexLayout extends Layout {
 
     // todo: we'll cheese it, and treat it like a sideways block
     public void layout() {
-
     }
 }

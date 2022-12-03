@@ -15,6 +15,7 @@ public class BlockLayout extends Layout {
         this.getPreviousSibling().ifPresent(
                 sibling -> this.setY(sibling.getY() + sibling.getHeight()));
 
+
         this.setDimension(this.getParent().getDimension());
 
         for (Layout child : this.getChildren()) {

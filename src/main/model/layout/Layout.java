@@ -72,6 +72,7 @@ public abstract class Layout {
     public static DocumentLayout constructTree(ArrayList<Node> html) {
         DocumentLayout result = new DocumentLayout();
         result.setChildren(constructTree(html, result));
+        result.layout();
         return result;
     }
 

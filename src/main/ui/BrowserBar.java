@@ -19,9 +19,6 @@ public class BrowserBar extends JToolBar {
         this.parent = parent;
 
         tabMenu = new JPopupMenu("Tabs");
-        tabMenu.add(new JMenuItem("Hello"));
-        tabMenu.add(new JMenuItem("World"));
-        tabMenu.add(new JMenuItem("Lorem"));
 
         tabButton = new JToggleButton("Tabs");
         tabButton.addActionListener(toggleTabMenu());
@@ -44,8 +41,6 @@ public class BrowserBar extends JToolBar {
                 String uri = uriInput.getText();
                 parent.render(uri);
                 addTab(uri);
-                System.out.println(uri);
-                System.out.println("should run");
             }
         };
     }
@@ -66,13 +61,13 @@ public class BrowserBar extends JToolBar {
                 } else {
                     tabMenu.remove(tabButton);
                     tabMenu.setVisible(false);
-                    parent.removeTab(tab);
+                    parent.getBrowserState().removeTab(tab);
                 }
             }
         });
 
         this.tabMenu.add(tabButton);
-        parent.addTab(tab);
+        parent.getBrowserState().addTab(tab);
     }
 
     // MODIFIES: this

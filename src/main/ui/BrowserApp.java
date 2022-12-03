@@ -103,20 +103,6 @@ public class BrowserApp {
         }
     }
 
-    /*
-    private void mainLoopII(ArrayList<String> rawHtml, String border, HtmlParser parser) {
-        while (true) {
-            println("Page rendered. Input additional raw HTML if desired.");
-            rawHtml.add(input.next());
-            println(border);
-            for (String s : rawHtml) {
-                parser = new HtmlParser();
-                renderHtml(parser.parseHtml(s));
-            }
-            println(border);
-        }
-    }*/
-
     /**
      * EFFECTS: Barebones HTML rendering. Iterates through a list of Nodes and their children and prints any text.
      */
