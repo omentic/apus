@@ -29,6 +29,21 @@ I've heard that Java Swing has a native HTML rendering component. I hope to enti
 - You can save the state of my application by attempting to close it with tabs open. You will be asked if you would like to save your tabs.
 - You can load the state of my application by attempting to open it after saving tabs. You will be asked if you would like to restore your tabs.
 
+## Phase IV: Task 2
+
+```
+Fri Dec 02 20:53:00 PST 2022
+Added tab /home/apropos/Projects/website/j-james/index.html to tablist
+Fri Dec 02 20:53:01 PST 2022
+Added tab /home/apropos/Projects/website/j-james/index.html to tablist
+Fri Dec 02 20:53:07 PST 2022
+Removed tab /home/apropos/Projects/website/j-james/index.html from tablist
+```
+
+## Phase IV: Task 3
+
+
+
 ## credits
 
 This project makes extensive use of the Javatuples library ([javatuples.org](https://www.javatuples.org/)).

@@ -30,11 +30,11 @@ public class BrowserState {
         if (!this.tabs.contains(added)) {
             this.tabs.add(added);
         }
-        EventLog.getInstance().logEvent(new Event("Added tab " + added));
+        EventLog.getInstance().logEvent(new Event("Added tab " + added + " to tablist"));
     }
 
     public void removeTab(String removed) {
         this.tabs.remove(removed);
-        EventLog.getInstance().logEvent(new Event("Removed tab " + removed));
+        EventLog.getInstance().logEvent(new Event("Removed tab " + removed + " from tablist"));
     }
 }
