@@ -1,6 +1,8 @@
 package model.layout;
 
+import model.html.ElementNode;
 import model.html.Node;
+import model.html.TextNode;
 
 import java.awt.*;
 
@@ -25,12 +27,26 @@ public class InlineLayout extends Layout {
         this.setWidth(this.getParent().getWidth());
         this.setCursor(this.getX(), this.getY());
 
+        Node node = this.getAssociatedNode();
+        if (node instanceof TextNode) {
+            if (node.getData().length() > 5) {
+                this.setHeight(20);
+//                this.setWidth(this.getWidth() + node.getData().length());
+            }
+        } else if (node instanceof ElementNode) {
+            if (((ElementNode) node).getTag().equals("a")) {
+                this.setX(this.getX() + this.getParent().getWidth());
+            }
+        }
+
         for (Layout child : this.getChildren()) {
             child.layout();
+            this.setHeight(this.getHeight() + child.getHeight()); // fixme
         }
 
         // todo: recurse to calculate cursor
-        this.setHeight(cursor.getY() - this.getY());
+//        this.setHeight(cursor.getY() - this.getY());
+//        System.out.println(this.getAssociatedNode().getData() + this.getLocation());
     }
 
     public void setCursor(Point cursor) {

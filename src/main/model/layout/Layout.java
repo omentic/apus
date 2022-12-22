@@ -86,7 +86,8 @@ public abstract class Layout {
     // man, fuck design patterns, this is so much goddamn code
 
     public void setLocation(Point point) {
-        this.location = point;
+        this.location.x = point.x;
+        this.location.y = point.y;
     }
 
     public void setX(double x) {

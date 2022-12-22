@@ -43,6 +43,7 @@ public class BrowserWindow extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
         render("/home/apropos/Projects/website/j-james/index.html");
+//        render("data/example.hctml");
 //        browserBar.addTab("/home/apropos/Projects/website/j-james/index.html");
         setVisible(true);
         setClosingBehavior();
