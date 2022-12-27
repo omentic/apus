@@ -1,9 +1,6 @@
 package ui;
 
-import model.html.ElementNode;
-import model.html.HtmlParser;
-import model.html.TextNode;
-import model.html.Node;
+import model.html.*;
 
 import java.nio.file.*;
 import java.util.*;
@@ -18,24 +15,15 @@ public class BrowserApp {
     private ArrayList<Node> parsed;
     private ArrayDeque<String> tabs;
 
-    /**
-     * EFFECTS: Renders an arbitrary HTML page and arbitrary HTML input.
-     */
+    // Renders an arbitrary HTML page and arbitrary HTML input.
     public BrowserApp() {
         println("apus: currently a barebones html/css renderer");
         this.input = new Scanner(System.in);
         this.tabs = new ArrayDeque<>();
-        mainLoop();
-    }
 
-    /**
-     * EFFECTS: Runs the main loop
-     */
-    private void mainLoop() {
         while (true) {
             try {
-                Path path = Paths.get(pathString);
-                String file = new String(Files.readAllBytes(path));
+                String file = Files.readString(Path.of(pathString));
                 HtmlParser parser = new HtmlParser();
                 parsed = parser.parseHtml(file);
                 println(border);
@@ -52,43 +40,38 @@ public class BrowserApp {
         }
     }
 
-    /**
-     * EFFECTS: Barebones HTML rendering. Iterates through a list of Nodes and their children and prints any text.
-     */
+    // Barebones HTML rendering. Iterates through a list of Nodes and their children and prints any text.
     private void renderHtml(ArrayList<Node> html) {
         for (Node node: html) {
-            if (node instanceof TextNode) {
-                println(node.getData());
-            } else {
-                renderHtml(((ElementNode) node).getChildren());
+            switch (node) {
+                case ElementNode e -> {
+                    renderHtml(e.getChildren());
+                }
+                default -> {
+                    println(node.getData());
+                }
             }
         }
     }
 
-    /**
-     * EFFECTS: Handles user input after rendering an initial site
-     */
+    // Handles user input after rendering an initial site
     private void handleInput(String input) {
         switch (input) {
-            case "newuri":
+            case "newuri" -> {
                 println("please provide a path to a file (examples located in data/*):");
                 pathString = this.input.next();
-                break;
-            case "newtab":
+            }
+            case "newtab" -> {
                 this.tabs.add(pathString);
                 println("please provide a path to a file (examples located in data/*):");
                 pathString = this.input.next();
-                break;
-            case "nexttab":
+            }
+            case "nexttab" -> {
                 this.tabs.add(pathString);
                 pathString = this.tabs.removeFirst();
-                break;
-            case "quit":
-                System.exit(0);
-                break;
-            default:
-                println("Sorry, I didn't quite get that. Please try again.");
-                break;
+            }
+            case "quit" -> System.exit(0);
+            default -> println("Sorry, I didn't quite get that. Please try again.");
         }
     }
 

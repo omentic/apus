@@ -43,8 +43,6 @@ public class HtmlParser {
 
     private ParserState state;
 
-    // EFFECTS: constructs a new HTML parser.
-    // MODIFIES: this
     public HtmlParser() {
         result = new ArrayList<>();
         unfinished = new ArrayDeque<>();
@@ -65,118 +63,76 @@ public class HtmlParser {
             // System.out.print(state);
             // System.out.println(" " + c + " " + currentText);
             switch (state) {
-                case HTML: caseHtml(c);
-                    break;
-                case UNKNOWN_TAG: caseUnknownTag(c);
-                    break; // FOOTGUN LANGUAGE DESIGN STRIKES AGAIN
-                case IGNORED: caseIgnored(c);
-                    break;
-                case OPENING_TAG: caseOpeningTag(c);
-                    break;
-                case CLOSING_TAG: caseClosingTag(c);
-                    break;
-                case KEY: caseKey(c);
-                    break;
-                case VALUE: caseValue(c);
-                    break;
-                case SINGLE_QUOTES: caseSingleQuotes(c);
-                    break;
-                case DOUBLE_QUOTES: caseDoubleQuotes(c);
-                    break;
+                case HTML -> caseHtml(c);
+                case UNKNOWN_TAG -> caseUnknownTag(c);
+                case IGNORED -> caseIgnored(c);
+                case OPENING_TAG -> caseOpeningTag(c);
+                case CLOSING_TAG -> caseClosingTag(c);
+                case KEY -> caseKey(c);
+                case VALUE -> caseValue(c);
+                case SINGLE_QUOTES -> caseSingleQuotes(c);
+                case DOUBLE_QUOTES -> caseDoubleQuotes(c);
             }
         }
         return result;
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the HTML state.
-     * MODIFIES: this
-     */
     private void caseHtml(char c) {
         switch (c) {
-            case '<':
+            case '<' -> {
                 state = ParserState.UNKNOWN_TAG;
                 if (!currentText.equals("")) {
                     addNewTextNode();
                 }
-                break; // FOOTGUN LANGUAGE DESIGN
-            case ' ': case '\n':
+            }
+            case ' ', '\n' -> {
                 if (previousChar != ' ') {
                     currentText += ' ';
                 }
                 previousChar = ' ';
-                break;
-            default:
+            }
+            default -> {
                 currentText += c;
                 previousChar = c;
-                break;
+            }
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the UNKNOWN_TAG state.
-     * MODIFIES: this
-     */
     private void caseUnknownTag(char c) {
         switch (c) {
-            case '/':
-                state = ParserState.CLOSING_TAG;
-                break;
-            case '>': // Why would you put <> in your HTML??? go away
+            case '/' -> state = ParserState.CLOSING_TAG;
+            case '>' -> { // Why would you put <> in your HTML??? go away
                 state = ParserState.HTML;
                 currentText += "<>";
-                break;
-            // For now, we'll straight-up ignore anything matching the <!...> syntax:
+            }
+            // For now, we'll straight up ignore anything matching the <!...> syntax:
             // i.e. comments, and <!DOCTYPE html>
-            case '!':
-                state = ParserState.IGNORED;
-                break;
-            default:
+            case '!' -> state = ParserState.IGNORED;
+            default -> {
                 state = ParserState.OPENING_TAG;
                 currentTag += c;
-                break;
+            }
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the IGNORED state.
-     * MODIFIES: this
-     */
     private void caseIgnored(char c) {
         switch (c) {
-            case '>':
-                state = ParserState.HTML;
-                break;
-            default:
-                break;
+            case '>' -> state = ParserState.HTML;
+            default -> {}
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the OPENING_TAG state.
-     * MODIFIES: this
-     */
     private void caseOpeningTag(char c) {
         switch (c) {
-            case '>':
-                addNewElementNode();
-                break;
-            case ' ': case '\n':
-                state = ParserState.KEY;
-                break;
-            default:
-                currentTag += c;
-                break;
+            case '>' -> addNewElementNode();
+            case ' ', '\n' -> state = ParserState.KEY;
+            default -> currentTag += c;
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the CLOSING_TAG state.
-     * MODIFIES: this
-     */
     private void caseClosingTag(char c) {
         switch (c) {
-            case '>':
+            case '>' -> {
                 state = ParserState.HTML;
                 // IMPORTANT: we don't validate that closing tags correspond to an open tag
                 if (!isSelfClosingTag(currentTag)) {
@@ -185,72 +141,46 @@ public class HtmlParser {
                     }
                 }
                 currentTag = "";
-                break;
-            case ' ': case '\n':
-                break;
-            default:
-                currentTag += c;
-                break;
+            }
+            case ' ', '\n' -> {}
+            default -> currentTag += c;
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the KEY state.
-     * MODIFIES: this
-     */
     private void caseKey(char c) {
         switch (c) {
-            case '>':
-                addNewElementNode();
-                break;
-            case '=':
-                state = ParserState.VALUE;
-                break;
-            case ' ': case '\n':
-                break;
-            default:
-                currentKey += c;
-                break;
+            case '>' -> addNewElementNode();
+            case '=' -> state = ParserState.VALUE;
+            case ' ', '\n' -> {}
+            default -> currentKey += c;
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the VALUE state.
-     * MODIFIES: this
-     */
     private void caseValue(char c) {
         switch (c) {
-            case '\'': state = ParserState.SINGLE_QUOTES;
-                break;
-            case '\"': state = ParserState.DOUBLE_QUOTES;
-                break;
-            case ' ': case '\n':
+            case '\'' -> state = ParserState.SINGLE_QUOTES;
+            case '\"' -> state = ParserState.DOUBLE_QUOTES;
+            case ' ', '\n' -> {
                 state = ParserState.KEY;
                 currentAttributes.add(new Pair<>(currentKey, currentValue));
                 currentKey = "";
                 currentValue = "";
-                break; // THE FOOTGUN DESIGN STRIKES AGAIN
-            case '>':
+            }
+            case '>' -> {
                 if (!currentKey.equals("") || !currentValue.equals("")) {
                     currentAttributes.add(new Pair<>(currentKey, currentValue));
                     currentKey = "";
                     currentValue = "";
                 }
                 addNewElementNode();
-                break;
-            default:
-                currentValue += c;
-                break;
+            }
+            default -> currentValue += c;
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the SINGLE_QUOTES state.
-     * MODIFIES: this
-     */
     private void caseSingleQuotes(char c) {
         switch (c) {
-            case '\'':
+            case '\'' -> {
                 if (previousChar != '\\') {
                     state = ParserState.VALUE;
                     previousChar = '\0';
@@ -259,21 +189,17 @@ public class HtmlParser {
                     currentValue += c;
                     previousChar = c;
                 }
-                break;
-            default:
+            }
+            default -> {
                 currentValue += c;
                 previousChar = c;
-                break;
+            }
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the DOUBLE_QUOTES state.
-     * MODIFIES: this
-     */
     private void caseDoubleQuotes(char c) {
         switch (c) {
-            case '\"':
+            case '\"' -> {
                 if (previousChar != '\\') {
                     state = ParserState.VALUE;
                     previousChar = '\0';
@@ -282,19 +208,15 @@ public class HtmlParser {
                     currentValue += c;
                     previousChar = c;
                 }
-                break; // FOOTGUN LANGUAGE DESIGN
-            default:
+            }
+            default -> {
                 currentValue += c;
                 previousChar = c;
-                break;
+            }
         }
     }
 
-    /**
-     * Helper function to remove code duplication.
-     * EFFECTS: Creates and adds a new ElementNode from the current buffers to the unfinished and result stacks
-     * MODIFIES: this
-     */
+    // Helper function to remove code duplication.
     private void addNewElementNode() {
         state = ParserState.HTML;
         ElementNode node = new ElementNode(currentTag, currentAttributes);
@@ -313,11 +235,7 @@ public class HtmlParser {
         currentAttributes = new ArrayList<>();
     }
 
-    /**
-     * Helper function to check method length boxes.
-     * EFFECTS: Creates and adds a new TextNode from the current buffers to the unfinished and result stacks
-     * MODIFIES: this
-     */
+    // Helper function to check method length boxes.
     private void addNewTextNode() {
         if (unfinished.size() != 0) {
             unfinished.getLast().addChild(new TextNode(currentText));
@@ -328,21 +246,13 @@ public class HtmlParser {
         previousChar = '\0';
     }
 
-    /**
-     * Simple helper function to check if a tag is self-closing.
-     * EFFECTS: Returns whether a String tag is a self-closing tag.
-     */
+    // Simple helper function to check if a tag is self-closing.
     private static boolean isSelfClosingTag(String tag) {
-        switch (tag) {
-            case "input": case "param":
-            case "br": case "hr": case "wbr":
-            case "img": case "embed": case "area":
-            case "meta":  case "base": case "link":
-            case "source": case "track": case "col":
-                return true;
-            default:
-                return false;
-        }
+        return switch (tag) {
+            case "input", "param", "br", "hr", "wbr", "img", "embed", "area",
+                 "meta", "base", "link", "source", "track", "col" -> true;
+            default -> false;
+        };
     }
 }
 

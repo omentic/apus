@@ -60,10 +60,6 @@ public class CssParser {
      * however we do keep a previousChar value for dealing with (annoying) escaped quotes.
      * It should be fast - I'd say something about time complexity if I knew anything about time complexity.
      * No guarantees are made about invalid CSS files. Also, no guarantees are made about valid CSS files, lol.
-     * <br>
-     * REQUIRES: A valid CSS file, as a raw String.
-     * MODIFIES: this
-     * EFFECTS: Returns a parsed CSS representation as several nested ArrayLists and Pairs of Strings.
      */
     public ArrayList<Pair<String, ArrayList<Pair<String, String>>>> parseCSS(String input) {
 
@@ -71,77 +67,52 @@ public class CssParser {
             // System.out.print(state);
             // System.out.println(" " + c);
             switch (state) {
-                case SELECTORS: caseSelectors(c);
-                    break;
-                case MEDIA_SELECTORS: caseMediaSelectors(c);
-                    break;
-                case ATTRIBUTE: caseAttribute(c);
-                    break;
-                case VALUE: caseValue(c);
-                    break;
-                case SINGLE_QUOTES: caseSingleQuotes(c);
-                    break;
-                case DOUBLE_QUOTES: caseDoubleQuotes(c);
-                    break;
+                case SELECTORS -> caseSelectors(c);
+                case MEDIA_SELECTORS -> caseMediaSelectors(c);
+                case ATTRIBUTE -> caseAttribute(c);
+                case VALUE -> caseValue(c);
+                case SINGLE_QUOTES -> caseSingleQuotes(c);
+                case DOUBLE_QUOTES -> caseDoubleQuotes(c);
             }
         }
         return result;
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the SELECTORS state.
-     * See also: the (slightly wrong) context-free grammar commented at the start of this file.
-     * MODIFIES: this
-     */
+    // Handles and updates parser state/buffers for a single character while in the SELECTORS state.
+    // See also: the (slightly wrong) context-free grammar commented at the start of this file.
     private void caseSelectors(char c) {
         switch (c) {
-            case '@':
+            case '@' -> {
                 if (currentSelector.equals("")) {
                     state = ParserState.MEDIA_SELECTORS;
                 } else {
                     currentSelector += c;
                 }
-                break;
-            case '{':
-                state = ParserState.ATTRIBUTE;
-                break;
-            case ' ': case '\n':
-                break;
+            }
+            case '{' -> state = ParserState.ATTRIBUTE;
+            case ' ', '\n' -> {}
             // todo: do better than blindly create a string; pattern match on css selectors
-            default:
-                currentSelector += c;
-                break;
+            default -> currentSelector += c;
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the MEDIA_SELECTORS state.
-     * MODIFIES: this
-     */
+    // Handles and updates parser state/buffers for a single character while in the MEDIA_SELECTORS state.
     private void caseMediaSelectors(char c) {
         switch (c) {
             // todo: don't entirely disregard media queries, also split between @media/@...
-            case '{':
+            case '{' -> {
                 state = ParserState.SELECTORS;
-                // discard currentSelector
                 currentSelector = "";
-                break;
-            default:
-                currentSelector += c;
-                break;
+            }
+            default -> currentSelector += c;
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the ATTRIBUTE state.
-     * MODIFIES: this
-     */
+    // Handles and updates parser state/buffers for a single character while in the ATTRIBUTE state.
     private void caseAttribute(char c) {
         switch (c) {
-            case ':':
-                state = ParserState.VALUE;
-                break;
-            case '}':
+            case ':' -> state = ParserState.VALUE;
+            case '}' -> {
                 state = ParserState.SELECTORS;
                 if (!currentValue.equals("") || !currentProperty.equals("")) {
                     // System.out.println("something's wrong");
@@ -151,26 +122,20 @@ public class CssParser {
                 result.add(new Pair<>(currentSelector, currentRule));
                 currentSelector = "";
                 currentRule = new ArrayList<>();
-                break;
-            case ' ': case '\n':
-                break;
-            default:
-                currentProperty += c;
-                break;
+            }
+            case ' ', '\n' -> {}
+            default -> currentProperty += c;
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the VALUE state.
-     * MODIFIES: this
-     */
+    // Handles and updates parser state/buffers for a single character while in the VALUE state.
     private void caseValue(char c) {
         switch (c) {
-            case ';':
+            case ';' -> {
                 state = ParserState.ATTRIBUTE;
                 updateCurrentRule();
-                break;
-            case '}':
+            }
+            case '}' -> {
                 state = ParserState.SELECTORS;
                 if (!currentValue.equals("") || !currentProperty.equals("")) {
                     updateCurrentRule();
@@ -178,25 +143,22 @@ public class CssParser {
                 result.add(new Pair<>(currentSelector, currentRule));
                 currentSelector = "";
                 currentRule = new ArrayList<>();
-                break;
+            }
             // todo: handle spaces better: they're actually important inside values
-            case ' ': case '\n': break; // believe me, i think this is ugly too but it passes checkstyle
-            case '\'':
+            case ' ', '\n' -> {}
+            case '\'' -> {
                 state = ParserState.SINGLE_QUOTES;
                 currentValue += c;
-                break;
-            // intentional use of TERRIBLE SMOKING FOOTGUN behavior to check boxes
-            case '\"': state = ParserState.DOUBLE_QUOTES;
-            default: currentValue += c;
-                break;
+            }
+            case '\"' -> {
+                state = ParserState.DOUBLE_QUOTES;
+                currentValue += c;
+            }
+            default -> currentValue += c;
         }
     }
 
-    /**
-     * Helper function to check method length boxes.
-     * EFFECTS: Adds a new property to the current rule.
-     * MODIFIES: this
-     */
+    // Helper function to check method length boxes.
     private void updateCurrentRule() {
         currentRule.add(new Pair<>(currentProperty, currentValue));
         currentProperty = "";
@@ -205,13 +167,10 @@ public class CssParser {
 
     // todo: handle additional escaped characters, though what we have right now isn't bad
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the SINGLE_QUOTES state.
-     * MODIFIES: this
-     */
+    // Handles and updates parser state/buffers for a single character while in the SINGLE_QUOTES state.
     private void caseSingleQuotes(char c) {
         switch (c) {
-            case '\'':
+            case '\'' -> {
                 if (previousChar != '\\') {
                     state = ParserState.VALUE;
                     // quotes in css are exclusively? for paths: so we want to include the quotes themselves
@@ -223,21 +182,18 @@ public class CssParser {
                     currentValue += c;
                     previousChar = c;
                 }
-                break;
-            default:
+            }
+            default -> {
                 currentValue += c;
                 previousChar = c;
-                break;
+            }
         }
     }
 
-    /**
-     * EFFECTS: Handles and updates parser state/buffers for a single character while in the DOUBLE_QUOTES state.
-     * MODIFIES: this
-     */
+    // Handles and updates parser state/buffers for a single character while in the DOUBLE_QUOTES state.
     private void caseDoubleQuotes(char c) {
         switch (c) {
-            case '\"':
+            case '\"' -> {
                 if (previousChar != '\\') {
                     state = ParserState.VALUE;
                     currentValue += c;
@@ -247,11 +203,11 @@ public class CssParser {
                     currentValue += c;
                     previousChar = c;
                 }
-                break;
-            default:
+            }
+            default -> {
                 currentValue += c;
                 previousChar = c;
-                break;
+            }
         }
     }
 
@@ -260,8 +216,8 @@ public class CssParser {
      * When given an invalid string (i.e. "12p53x"), it will produce an invalid result instead of throwing.
      * However, it should parse every valid string correctly.
      * <br>
-     * REQUIRES: A string of the form [NUMBER][VALIDUNIT]
-     * EFFECTS: Returns a number, in pixels, that has been converted appropriately
+     * Takes a string of the form [NUMBER][VALIDUNIT]
+     * Returns a number, in pixels, that has been converted appropriately
      */
     public static double parseUnits(String input) {
         String numbers = "";
@@ -286,26 +242,23 @@ public class CssParser {
     }
 
     /**
-     * REQUIRES: a String that is a unit, otherwise defaults to pixels
-     * EFFECTS: converts a value in some units to a value in pixels
+     * Takes a String that is a unit, otherwise defaults to pixels
+     * Converts the value in some units to a value in pixels
      */
     private static double convertUnits(String units, double value) {
-        // god case/break is such a fault-provoking design i hate it
-        // good thing we avoid breaks entirely here lmao
-        switch (units) {
+        return switch (units) {
             // absolute units
-            case "px": return value;
-            case "pc": return value * 16;
-            case "pt": return value * (4.0 / 3.0);
-            case "cm": return value * 37.8;
-            case "mm": return value * 378;
-            case "Q":  return value * 1512;
-            case "in": return value * 96;
+            case "px" -> value;
+            case "pc" -> value * 16;
+            case "pt" -> value * (4.0 / 3.0);
+            case "cm" -> value * 37.8;
+            case "mm" -> value * 378;
+            case "Q" -> value * 1512;
+            case "in" -> value * 96;
             // not handled: % em ex ch rem lh rlh vw vh vmin vmax vb vi svw svh lvw lvh dvw dvh
-            default:
+            default -> value;
                 // System.out.printf("Unit %s not implemented, defaulting to %s in pixels...%n", units, value);
-                return value;
-        }
+        };
     }
 }
 

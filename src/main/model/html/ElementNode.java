@@ -8,15 +8,11 @@ import java.util.ArrayList;
  * This ElementNode class represents an HTML tag and nested tags.
  */
 public class ElementNode implements Node {
-    private String tag;
-    private ArrayList<Pair<String,String>> attributes;
+    private final String tag;
+    private final ArrayList<Pair<String,String>> attributes;
 
-    private ArrayList<Node> children;
+    private final ArrayList<Node> children;
 
-    /**
-     * EFFECTS: Constructs a new ElementNode from the arguments provided.
-     * MODIFIES: this
-     */
     public ElementNode(String tag, ArrayList<Pair<String, String>> attributes, ArrayList<Node> children) {
         this.tag = tag;
         this.attributes = attributes;
@@ -25,8 +21,6 @@ public class ElementNode implements Node {
 
     /**
      * Overloads the constructor for ease of use. We often don't provide children, at first.
-     * EFFECTS: Constructs a new ElementNode from the arguments provided.
-     * MODIFIES: this
      */
     public ElementNode(String tag, ArrayList<Pair<String, String>> attributes) {
         this(tag, attributes, new ArrayList<>());
@@ -34,17 +28,11 @@ public class ElementNode implements Node {
 
     /**
      * Overloads the constructor for ease of use. Should probably only be used for tests.
-     * EFFECTS: Constructs a new ElementNode from the arguments provided.
-     * MODIFIES: this
      */
     public ElementNode(String tag) {
         this(tag, new ArrayList<>(), new ArrayList<>());
     }
 
-    /**
-     * EFFECTS: Adds a child to the children ArrayList.
-     * MODIFIES: this
-     */
     public void addChild(Node child) {
         this.children.add(child);
     }

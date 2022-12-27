@@ -6,19 +6,16 @@ import model.html.TextNode;
 
 import java.awt.*;
 
-// Inline layout style
 public class InlineLayout extends Layout {
 
     private Point cursor;
 
-    // Constructs a new InlineLayout
     public InlineLayout(Node node, Layout parent) {
         super(node, parent);
         cursor = new Point();
     }
 
-    // MODIFIES: this
-    // EFFECTS: recursively constructs the layout tree
+    // recursively construct the layout tree
     public void layout() {
         this.setLocation(this.getParent().getLocation());
         this.getPreviousSibling().ifPresent(
@@ -28,14 +25,17 @@ public class InlineLayout extends Layout {
         this.setCursor(this.getX(), this.getY());
 
         Node node = this.getAssociatedNode();
-        if (node instanceof TextNode) {
-            if (node.getData().length() > 5) {
-                this.setHeight(20);
-//                this.setWidth(this.getWidth() + node.getData().length());
+        switch (node) {
+            case ElementNode e -> {
+                if (e.getTag().equals("a")) {
+                    this.setX(this.getX() + this.getParent().getWidth());
+                }
             }
-        } else if (node instanceof ElementNode) {
-            if (((ElementNode) node).getTag().equals("a")) {
-                this.setX(this.getX() + this.getParent().getWidth());
+            default -> {
+                if (node.getData().length() > 5) {
+                    this.setHeight(20);
+//                    this.setWidth(this.getWidth() + node.getData().length());
+                }
             }
         }
 
