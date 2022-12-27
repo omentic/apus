@@ -1,7 +1,5 @@
 package model.html;
 
-import org.json.JSONObject;
-
 /**
  * This Node represents an abstract relationship between ElementNode and TextNode.
  * It's extremely helpful / necessary for Lists of arbitrary ElementNodes/TextNodes.
@@ -9,7 +7,4 @@ import org.json.JSONObject;
 public interface Node {
     // Return a representation of the Node. Useful for debugging.
     public String getData();
-
-    // EFFECTS: returns a serialized form of the data
-    public JSONObject serialize();
 }

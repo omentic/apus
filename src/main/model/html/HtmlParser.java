@@ -3,8 +3,6 @@ package model.html;
 import java.util.*;
 
 import org.javatuples.*;
-import org.json.JSONObject;
-import persistance.JsonAble;
 
 /**
  * This class represents the state of and implements an LL(1) HTML parser.
@@ -19,7 +17,7 @@ import persistance.JsonAble;
  * SELF_CLOSING_TAG ::= 'img' | ...
  * (note that \forall T \in SELF_CLOSING_TAG, T \notin TAG)
  */
-public class HtmlParser implements JsonAble {
+public class HtmlParser {
 
     /**
      * HTML is not nice to parse. We manage to get away with a relatively small number of parser states regardless.
@@ -345,10 +343,6 @@ public class HtmlParser implements JsonAble {
             default:
                 return false;
         }
-    }
-
-    public JSONObject serialize() {
-        return new JSONObject(this);
     }
 }
 

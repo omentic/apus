@@ -1,8 +1,5 @@
 package model;
 
-import model.util.Event;
-import model.util.EventLog;
-
 import java.util.ArrayDeque;
 
 // This BrowserState function collects the stateful portions of the browser into one modelable class.
@@ -37,13 +34,11 @@ public class BrowserState {
         if (!this.tabs.contains(added)) {
             this.tabs.add(added);
         }
-        EventLog.getInstance().logEvent(new Event("Added tab " + added + " to tablist"));
     }
 
     // MODIFIES: this
     // EFFECTS: removes a tab from the tablist
     public void removeTab(String removed) {
         this.tabs.remove(removed);
-        EventLog.getInstance().logEvent(new Event("Removed tab " + removed + " from tablist"));
     }
 }
