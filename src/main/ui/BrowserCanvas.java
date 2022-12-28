@@ -13,13 +13,13 @@ public class BrowserCanvas extends JPanel {
     public BrowserCanvas(ArrayList<Node> html) {
         super();
         this.currentLayout = Layout.constructTree(html);
-        printTree(this.currentLayout.getChildren());
+        printTree(this.currentLayout.children);
     }
 
     private void printTree(ArrayList<Layout> tree) {
         for (Layout node : tree) {
-            System.out.println(System.identityHashCode(node.getLocation()));
-            printTree((node).getChildren());
+//            System.out.println(System.identityHashCode(node.location));
+            printTree((node).children);
         }
     }
 
@@ -27,21 +27,21 @@ public class BrowserCanvas extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Point location = new Point(10, 20); // we need a mutable reference
-        renderHtml(this.currentLayout.getChildren(), g, location);
+        renderHtml(this.currentLayout.children, g, location);
     }
 
     private void renderHtml(ArrayList<Layout> tree, Graphics g, Point location) {
         for (Layout layout : tree) {
-//            System.out.println(layout.getLocation());
-            g.drawRect(layout.getLocation().x, layout.getLocation().y, layout.getDimension().width, layout.getDimension().height);
-            if (layout.getAssociatedNode() instanceof TextNode) {
-                if (layout.getAssociatedNode().getData().length() > 5) {
+//            System.out.println(layout.location);
+            g.drawRect(layout.location.x, layout.location.y, layout.dimension.width, layout.dimension.height);
+            if (layout.associatedNode instanceof TextNode) {
+                if (layout.associatedNode.data().length() > 5) {
 //                    System.out.println(location);
-                    g.drawString(layout.getAssociatedNode().getData(), layout.getLocation().x, layout.getLocation().y);
+                    g.drawString(layout.associatedNode.data(), layout.location.x, layout.location.y);
                     g.drawString("X", 10, 20);
                 }
             } else {
-                renderHtml(layout.getChildren(), g, location);
+                renderHtml(layout.children, g, location);
             }
         }
     }

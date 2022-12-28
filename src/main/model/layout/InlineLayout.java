@@ -2,7 +2,6 @@ package model.layout;
 
 import model.html.ElementNode;
 import model.html.Node;
-import model.html.TextNode;
 
 import java.awt.*;
 
@@ -17,36 +16,36 @@ public class InlineLayout extends Layout {
 
     // recursively construct the layout tree
     public void layout() {
-        this.setLocation(this.getParent().getLocation());
-        this.getPreviousSibling().ifPresent(
-                sibling -> this.setY(sibling.getY() + sibling.getHeight()));
+        this.location = (Point) this.parent.location.clone(); // java moment
+        this.previousSibling.ifPresent(
+                sibling -> this.location.y = sibling.location.y + sibling.dimension.height);
 
-        this.setWidth(this.getParent().getWidth());
-        this.setCursor(this.getX(), this.getY());
+        this.dimension.width = this.parent.dimension.width;
+        this.setCursor(this.location.x, this.location.y);
 
-        Node node = this.getAssociatedNode();
+        Node node = this.associatedNode;
         switch (node) {
             case ElementNode e -> {
-                if (e.getTag().equals("a")) {
-                    this.setX(this.getX() + this.getParent().getWidth());
+                if (e.tag.equals("a")) {
+                    this.location.x += this.parent.dimension.width;
                 }
             }
             default -> {
-                if (node.getData().length() > 5) {
-                    this.setHeight(20);
-//                    this.setWidth(this.getWidth() + node.getData().length());
+                if (node.data().length() > 5) {
+                    this.dimension.height = 20;
+//                    this.dimension.width = this.dimension.width + node.data().length();
                 }
             }
         }
 
-        for (Layout child : this.getChildren()) {
+        for (Layout child : this.children) {
             child.layout();
-            this.setHeight(this.getHeight() + child.getHeight()); // fixme
+            this.dimension.height += child.dimension.height; // fixme
         }
 
         // todo: recurse to calculate cursor
-//        this.setHeight(cursor.getY() - this.getY());
-//        System.out.println(this.getAssociatedNode().getData() + this.getLocation());
+//        this.height = cursor.location.y - this.location.y;
+//        System.out.println(this.associatedNode.data() + this.location);
     }
 
     public void setCursor(Point cursor) {

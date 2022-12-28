@@ -15,12 +15,12 @@ public class DocumentLayout extends Layout {
 
     // recursively construct the layout tree
     public void layout() {
-        this.setLocation(new Point(10, 20));
-        this.setDimension(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+        this.location = new Point(10, 20);
+        this.dimension = new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
-        for (Layout child : this.getChildren()) {
+        for (Layout child : this.children) {
             child.layout();
-            this.setHeight(this.getHeight() + child.getHeight());
+            this.dimension.height += child.dimension.height;
         }
     }
 }

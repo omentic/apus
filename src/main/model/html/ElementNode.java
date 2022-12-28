@@ -8,10 +8,10 @@ import java.util.ArrayList;
  * This ElementNode class represents an HTML tag and nested tags.
  */
 public class ElementNode implements Node {
-    private final String tag;
-    private final ArrayList<Pair<String,String>> attributes;
+    public final String tag;
+    public final ArrayList<Pair<String,String>> attributes;
 
-    private final ArrayList<Node> children;
+    public final ArrayList<Node> children;
 
     public ElementNode(String tag, ArrayList<Pair<String, String>> attributes, ArrayList<Node> children) {
         this.tag = tag;
@@ -33,24 +33,8 @@ public class ElementNode implements Node {
         this(tag, new ArrayList<>(), new ArrayList<>());
     }
 
-    public void addChild(Node child) {
-        this.children.add(child);
-    }
-
-    public String getTag() {
-        return this.tag;
-    }
-
-    public ArrayList<Pair<String, String>> getAttributes() {
-        return this.attributes;
-    }
-
-    public ArrayList<Node> getChildren() {
-        return this.children;
-    }
-
     // We implement this method for easy debugging.
-    public String getData() {
-        return getTag() + " " + getAttributes().toString();
+    public String data() {
+        return this.tag + " " + this.attributes.toString();
     }
 }

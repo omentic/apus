@@ -219,9 +219,9 @@ public class HtmlParser {
     // Helper function to remove code duplication.
     private void addNewElementNode() {
         state = ParserState.HTML;
-        ElementNode node = new ElementNode(currentTag, currentAttributes);
+        var node = new ElementNode(currentTag, currentAttributes);
         if (unfinished.size() != 0) {
-            unfinished.getLast().addChild(node);
+            unfinished.getLast().children.add(node);
             if (!isSelfClosingTag(currentTag)) {
                 unfinished.add(node);
             }
@@ -238,7 +238,7 @@ public class HtmlParser {
     // Helper function to check method length boxes.
     private void addNewTextNode() {
         if (unfinished.size() != 0) {
-            unfinished.getLast().addChild(new TextNode(currentText));
+            unfinished.getLast().children.add(new TextNode(currentText));
         } else {
             result.add(new TextNode(currentText));
         }

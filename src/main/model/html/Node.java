@@ -6,5 +6,5 @@ package model.html;
  */
 public interface Node {
     // Return a representation of the Node. Useful for debugging.
-    public String getData();
+    public String data();
 }

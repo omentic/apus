@@ -32,11 +32,11 @@ public class BrowserWindow extends JFrame {
     }
 
     public void render(String uri) {
-        state.setCurrentTab(uri);
+        state.currentTab = uri;
         remove(canvas);
-//        System.out.println(state.getCurrentTab());
+//        System.out.println(state.currentTab);
         try {
-            String file = Files.readString(Path.of(state.getCurrentTab()));
+            String file = Files.readString(Path.of(state.currentTab));
             HtmlParser parser = new HtmlParser();
             canvas = new BrowserCanvas(parser.parseHtml(file));
         } catch (Exception e) {

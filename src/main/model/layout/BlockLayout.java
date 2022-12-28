@@ -12,20 +12,20 @@ public class BlockLayout extends Layout {
 
     // recursively construct the layout tree
     public void layout() {
-        this.setLocation(this.getParent().getLocation());
-        this.getPreviousSibling().ifPresent(
-                sibling -> this.setY(sibling.getY() + sibling.getHeight()));
-        this.getPreviousSibling().ifPresent(
-                sibling -> System.out.println("bluh" + sibling.getAssociatedNode().getData()));
+        this.location = (Point) this.parent.location.clone();
+        this.previousSibling.ifPresent(
+                sibling ->  this.location.y = sibling.location.y + sibling.dimension.height);
+//        this.previousSibling.ifPresent(
+//                sibling -> System.out.println("bluh" + sibling.associatedNode.data()));
 
-//        this.setDimension(this.getParent().getDimension());
+//        this.dimension = (Dimension) this.parent.dimension.clone();
 
-        for (Layout child : this.getChildren()) {
+        for (Layout child : this.children) {
             child.layout();
-            this.setHeight(this.getHeight() + child.getHeight());
+            this.dimension.height += child.dimension.height;
         }
-//        System.out.println(this.getAssociatedNode().getData() + this.getLocation());
-//        System.out.println(System.identityHashCode(this.getLocation()));
-//        System.out.println(this.getAssociatedNode().getData() + this.getDimension());
+//        System.out.println(this.associatedNode.data() + this.location);
+//        System.out.println(System.identityHashCode(this.location));
+//        System.out.println(this.associatedNode.data() + this.dimension);
     }
 }

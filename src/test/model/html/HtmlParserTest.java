@@ -85,10 +85,12 @@ public class HtmlParserTest {
      */
     private static void assertEqualsHtml(ArrayList<Node> html, ArrayList<Node> expected) {
         for (int i = 0; i < html.size(); i++) {
-            assertEquals(html.get(i).getData(), expected.get(i).getData());
+            assertEquals(html.get(i).data(), expected.get(i).data());
             // System.out.println(html.get(i).getData() + " " + expected.get(i).getData());
-            if (html.get(i) instanceof ElementNode) {
-                assertEqualsHtml(((ElementNode) html.get(i)).getChildren(), ((ElementNode) expected.get(i)).getChildren());
+            switch (html.get(i)) {
+                case ElementNode e ->
+                        assertEqualsHtml(e.children, ((ElementNode) expected.get(i)).children);
+                default -> {}
             }
         }
     }
@@ -99,15 +101,16 @@ public class HtmlParserTest {
      */
     private void displayHtmlTree(ArrayList<Node> tree) {
         for (Node node : tree) {
-            if (node instanceof ElementNode) {
-                System.out.print(((ElementNode) node).getTag() + ": ");
-                for (Node n : ((ElementNode) node).getChildren()) {
-                    System.out.print(n.getData() + " ");
+            switch (node) {
+                case ElementNode e -> {
+                    System.out.print(e.tag + ": ");
+                    for (Node n : e.children) {
+                        System.out.print(n.data() + " ");
+                    }
+                    System.out.println();
+                    displayHtmlTree(e.children);
                 }
-                System.out.println();
-                displayHtmlTree(((ElementNode) node).getChildren());
-            } else {
-                System.out.println("Text: " + node.getData());
+                default -> System.out.println("Text: " + node.data());
             }
         }
     }

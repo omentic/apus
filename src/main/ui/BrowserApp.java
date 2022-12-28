@@ -45,10 +45,10 @@ public class BrowserApp {
         for (Node node: html) {
             switch (node) {
                 case ElementNode e -> {
-                    renderHtml(e.getChildren());
+                    renderHtml(e.children);
                 }
                 default -> {
-                    println(node.getData());
+                    println(node.data());
                 }
             }
         }

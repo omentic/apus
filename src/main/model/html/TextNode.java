@@ -5,7 +5,7 @@ package model.html;
  */
 public record TextNode(String text) implements Node {
     // We implement this method for easy debugging.
-    public String getData() {
+    public String data() {
         return text();
     }
 }

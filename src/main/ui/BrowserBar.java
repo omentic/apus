@@ -29,7 +29,6 @@ public class BrowserBar extends JToolBar {
         openUriButton = new JButton("Go");
         openUriButton.addActionListener(openTab());
         add(openUriButton);
-
     }
 
     private ActionListener openTab() {
