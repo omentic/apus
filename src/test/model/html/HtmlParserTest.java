@@ -16,57 +16,54 @@ public class HtmlParserTest {
 
     @Test
     void testIdiomaticHtml() {
-        ArrayList<Node> expected = new ArrayList<>();
-        ArrayList<Node> expectedChildren = new ArrayList<>();
-        ArrayList<Node> expectedGrandChildren = new ArrayList<>();
-        ArrayList<Node> expectedGreatGrandChildren = new ArrayList<>();
+        var expected = new ArrayList<Node>();
+        var expectedChildren = new ArrayList<Node>();
+        var expectedGrandChildren = new ArrayList<Node>();
+        var expectedGreatGrandChildren = new ArrayList<Node>();
         expected.add(new ElementNode("html", new ArrayList<>(), expectedChildren));
         expectedChildren.add(new ElementNode("head"));
         expectedChildren.add(new ElementNode("body", new ArrayList<>(), expectedGrandChildren));
         expectedGrandChildren.add(new ElementNode("p", new ArrayList<>(), expectedGreatGrandChildren));
         expectedGreatGrandChildren.add(new TextNode("Hello, world!"));
 
-        HtmlParser parser = new HtmlParser();
+        var parser = new HtmlParser();
         assertEqualsHtml(parser.parseHtml(idiomaticHtml), expected);
-        // displayHtmlTree(parser.parseHtml(idiomaticHtml));
     }
 
     @Test
     void testBrokenHtml() {
-        ArrayList<Node> expected = new ArrayList<>();
-        ArrayList<Node> expectedChildren = new ArrayList<>();
-        ArrayList<Node> expectedGrandChildren = new ArrayList<>();
+        var expected = new ArrayList<Node>();
+        var expectedChildren = new ArrayList<Node>();
+        var expectedGrandChildren = new ArrayList<Node>();
         expected.add(new ElementNode("html", new ArrayList<>(), expectedChildren));
         expectedChildren.add(new ElementNode("foo", new ArrayList<>(), expectedGrandChildren));
         expectedGrandChildren.add(new ElementNode("bar", new ArrayList<>()));
         expectedGrandChildren.add(new TextNode("<>"));
 
-        HtmlParser parser = new HtmlParser();
+        var parser = new HtmlParser();
         assertEqualsHtml(parser.parseHtml(brokenHtml), expected);
-        // displayHtmlTree(parser.parseHtml(brokenHtml));
     }
 
     @Test
     void testTrailingTextHtml() {
-        ArrayList<Node> expected = new ArrayList<>();
-        ArrayList<Node> expectedChildren = new ArrayList<>();
-        ArrayList<Node> expectedGrandChildren = new ArrayList<>();
+        var expected = new ArrayList<Node>();
+        var expectedChildren = new ArrayList<Node>();
+        var expectedGrandChildren = new ArrayList<Node>();
         expected.add(new TextNode("bot"));
         expected.add(new ElementNode("html", new ArrayList<>(), expectedChildren));
         expected.add(new TextNode("ba"));
         expectedChildren.add(new ElementNode("foo", new ArrayList<>(), expectedGrandChildren));
         expectedGrandChildren.add(new ElementNode("bar", new ArrayList<>()));
 
-        HtmlParser parser = new HtmlParser();
+        var parser = new HtmlParser();
         assertEqualsHtml(parser.parseHtml(trailingTextHtml), expected);
-        // displayHtmlTree(parser.parseHtml(trailingTextHtml));
     }
 
     @Test
     void testAttributesHtml() {
-        ArrayList<Node> expected = new ArrayList<>();
-        ArrayList<Node> expectedChildren = new ArrayList<>();
-        ArrayList<Pair<String, String>> expectedAttributes = new ArrayList<>();
+        var expected = new ArrayList<Node>();
+        var expectedChildren = new ArrayList<Node>();
+        var expectedAttributes = new ArrayList<Pair<String, String>>();
         expected.add(new ElementNode("html", new ArrayList<>(), expectedChildren));
         expectedChildren.add(new ElementNode("attr", expectedAttributes));
         expectedAttributes.add(new Pair<>("hello", "world"));
@@ -74,8 +71,8 @@ public class HtmlParserTest {
         expectedAttributes.add(new Pair<>("strange", "cha\"rm"));
         expectedAttributes.add(new Pair<>("up", "do'wn"));
 
-        HtmlParser parser = new HtmlParser();
-        ArrayList<Node> parsed = parser.parseHtml(attributesHtml);
+        var parser = new HtmlParser();
+        var parsed = parser.parseHtml(attributesHtml);
         displayHtmlTree(parsed);
         assertEqualsHtml(parsed, expected);
     }
@@ -86,7 +83,6 @@ public class HtmlParserTest {
     private static void assertEqualsHtml(ArrayList<Node> html, ArrayList<Node> expected) {
         for (int i = 0; i < html.size(); i++) {
             assertEquals(html.get(i).data(), expected.get(i).data());
-            // System.out.println(html.get(i).getData() + " " + expected.get(i).getData());
             switch (html.get(i)) {
                 case ElementNode e ->
                         assertEqualsHtml(e.children, ((ElementNode) expected.get(i)).children);

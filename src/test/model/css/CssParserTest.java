@@ -1,6 +1,5 @@
 package model.css;
 
-import model.css.CssParser;
 import org.javatuples.Pair;
 import org.junit.jupiter.api.Test;
 
@@ -10,15 +9,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CssParserTest {
 
+    String idiomaticCss = "body {    background-color: '#\\'f0f0f2';    margin: 0;  padding: 0;    font-family: -apple-system, system-ui, BlinkMacSystemFont, \"Segoe\\\" UI\",    'Open\\' Sans', \"Helvetica Neue\", Helvetica, Arial, sans-serif;}div {    width: 600px;    margin: 5em auto;    padding: 2em;    background-color: #fdfdff;    border-radius: 0.5em;    box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);}a:link, a:visited {    color: #38488f;    text-decoration: none;}@media (max - width : 700px) {    @media () {div {        margin: 0 auto;        width: auto    }}}";
+
     @Test
     void testIdiomaticCss() {
-        String idiomaticCss = "body {    background-color: '#\\'f0f0f2';    margin: 0;  padding: 0;    font-family: -apple-system, system-ui, BlinkMacSystemFont, \"Segoe\\\" UI\",    'Open\\' Sans', \"Helvetica Neue\", Helvetica, Arial, sans-serif;}div {    width: 600px;    margin: 5em auto;    padding: 2em;    background-color: #fdfdff;    border-radius: 0.5em;    box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);}a:link, a:visited {    color: #38488f;    text-decoration: none;}@media (max - width : 700px) {    @media () {div {        margin: 0 auto;        width: auto    }}}";
-
-        ArrayList<Pair<String, ArrayList<Pair<String, String>>>> expected = new ArrayList<>();
-        ArrayList<Pair<String, String>> body = new ArrayList<>();
-        ArrayList<Pair<String, String>> divOne = new ArrayList<>();
-        ArrayList<Pair<String, String>> selectors = new ArrayList<>();
-        ArrayList<Pair<String, String>> divTwo = new ArrayList<>();
+        var expected = new ArrayList<Pair<String, ArrayList<Pair<String, String>>>>();
+        var body = new ArrayList<Pair<String, String>>();
+        var divOne = new ArrayList<Pair<String, String>>();
+        var selectors = new ArrayList<Pair<String, String>>();
+        var divTwo = new ArrayList<Pair<String, String>>();
         expected.add(new Pair<>("body", body));
         expected.add(new Pair<>("div", divOne));
         expected.add(new Pair<>("a:link,a:visited", selectors));
@@ -40,7 +39,6 @@ public class CssParserTest {
 
         CssParser parser = new CssParser();
         assertEqualsCss(parser.parseCSS(idiomaticCss), expected);
-        // System.out.println(parser.parseCSS(idiomaticCss));
     }
 
     @Test
