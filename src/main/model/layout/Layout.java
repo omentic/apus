@@ -1,7 +1,6 @@
 package model.layout;
 
-import model.html.ElementNode;
-import model.html.Node;
+import model.html.*;
 
 import java.awt.*;
 import java.util.*;
@@ -11,8 +10,8 @@ public abstract class Layout {
     // fuck encapsulation all my homies hate encapsulation
     // but seriously, what a garbage idea: get a better language
     // (please read the above comment in the voice of https://www.youtube.com/watch?v=EdWSg6YwUeo)
-    public Point location;
-    public Dimension dimension;
+    public final Point location;
+    public final Dimension dimension;
 
     public final Node associatedNode;
     public final Layout parent;
@@ -20,16 +19,23 @@ public abstract class Layout {
     public Optional<Layout> nextSibling;
     public ArrayList<Layout> children;
 
+    public static final int DEFAULT_X = 10;
+    public static final int DEFAULT_Y = 20;
     public static final int DEFAULT_WIDTH = 1000;
     public static final int DEFAULT_HEIGHT = 800;
+    public static final int TEXT_WIDTH_CONSTANT = 7;
+    public static final int TEXT_HEIGHT_CONSTANT = 20;
 
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Block-level_elements
     public static final Set<String> BLOCK_ELEMENTS = new HashSet<>(
-            Arrays.asList("address", "article", "aside", "blockquote",
+            Arrays.asList("address", "article", "aside", "blockquote", "body",
                     "details", "dialog", "dd", "div", "dl", "dt",
                     "fieldset", "figcaption", "figure", "footer", "form",
                     "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr",
                     "li", "main", "nav", "ol", "p", "pre", "section", "table", "ul"));
+
+    public static final Set<String> HIDDEN_ELEMENTS = new HashSet<>(
+        Arrays.asList("head", "meta", "link", "title"));
 
     // the big function
     public abstract void layout();
@@ -55,15 +61,16 @@ public abstract class Layout {
             switch (node) {
                 case ElementNode e -> {
                     if (BLOCK_ELEMENTS.contains(e.tag)) {
-                        layout = new BlockLayout(node, parent);
+                        layout = new BlockLayout(e, parent);
                     } else {
-                        layout = new InlineLayout(node, parent);
+                        layout = new InlineLayout(e, parent);
                     }
                     layout.children = constructTree(e.children, layout);
                 }
-                default -> {
-                    layout = new InlineLayout(node, parent);
+                case TextNode t -> {
+                    layout = new TextLayout(t, parent);
                 }
+                default -> throw new IllegalStateException("Unexpected value: " + node);
             }
 
             if (result.size() > 0) {

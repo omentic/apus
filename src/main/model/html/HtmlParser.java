@@ -60,8 +60,6 @@ public class HtmlParser {
     public ArrayList<Node> parseHtml(String input) {
 
         for (char c : input.toCharArray()) {
-            // System.out.print(state);
-            // System.out.println(" " + c + " " + currentText);
             switch (state) {
                 case HTML -> caseHtml(c);
                 case UNKNOWN_TAG -> caseUnknownTag(c);
@@ -85,7 +83,7 @@ public class HtmlParser {
                     addNewTextNode();
                 }
             }
-            case ' ', '\n' -> {
+            case ' ', '\t', '\n' -> {
                 if (previousChar != ' ') {
                     currentText += ' ';
                 }
@@ -125,7 +123,7 @@ public class HtmlParser {
     private void caseOpeningTag(char c) {
         switch (c) {
             case '>' -> addNewElementNode();
-            case ' ', '\n' -> state = ParserState.KEY;
+            case ' ', '\t', '\n' -> state = ParserState.KEY;
             default -> currentTag += c;
         }
     }
@@ -142,7 +140,7 @@ public class HtmlParser {
                 }
                 currentTag = "";
             }
-            case ' ', '\n' -> {}
+            case ' ', '\t', '\n' -> {}
             default -> currentTag += c;
         }
     }
@@ -151,7 +149,7 @@ public class HtmlParser {
         switch (c) {
             case '>' -> addNewElementNode();
             case '=' -> state = ParserState.VALUE;
-            case ' ', '\n' -> {}
+            case ' ', '\t', '\n' -> {}
             default -> currentKey += c;
         }
     }
@@ -160,7 +158,7 @@ public class HtmlParser {
         switch (c) {
             case '\'' -> state = ParserState.SINGLE_QUOTES;
             case '\"' -> state = ParserState.DOUBLE_QUOTES;
-            case ' ', '\n' -> {
+            case ' ', '\t', '\n' -> {
                 state = ParserState.KEY;
                 currentAttributes.add(new Pair<>(currentKey, currentValue));
                 currentKey = "";
@@ -237,10 +235,12 @@ public class HtmlParser {
 
     // Helper function to check method length boxes.
     private void addNewTextNode() {
-        if (unfinished.size() != 0) {
-            unfinished.getLast().children.add(new TextNode(currentText));
-        } else {
-            result.add(new TextNode(currentText));
+        if (!currentText.equals(" ")) { // fixme
+            if (unfinished.size() != 0) {
+                unfinished.getLast().children.add(new TextNode(currentText));
+            } else {
+                result.add(new TextNode(currentText));
+            }
         }
         currentText = "";
         previousChar = '\0';

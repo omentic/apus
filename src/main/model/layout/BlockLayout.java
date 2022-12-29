@@ -1,31 +1,24 @@
 package model.layout;
 
-import model.html.Node;
-
-import java.awt.*;
+import model.html.ElementNode;
 
 public class BlockLayout extends Layout {
 
-    public BlockLayout(Node node, Layout parent) {
+    public BlockLayout(ElementNode node, Layout parent) {
         super(node, parent);
     }
 
     // recursively construct the layout tree
     public void layout() {
-        this.location = (Point) this.parent.location.clone();
-        this.previousSibling.ifPresent(
-                sibling ->  this.location.y = sibling.location.y + sibling.dimension.height);
-//        this.previousSibling.ifPresent(
-//                sibling -> System.out.println("bluh" + sibling.associatedNode.data()));
-
-//        this.dimension = (Dimension) this.parent.dimension.clone();
+        this.location.x = this.parent.location.x;
+        this.location.y = this.previousSibling
+            .map(sibling -> sibling.location.y + sibling.dimension.height)
+            .orElseGet(() -> this.parent.location.y);
 
         for (Layout child : this.children) {
             child.layout();
-            this.dimension.height += child.dimension.height;
+            this.dimension.height = Math.max(this.dimension.height, (child.location.y + child.dimension.height) - this.location.y);
+            this.dimension.width = Math.max(this.dimension.width, (child.location.x + child.dimension.width) - this.location.x);
         }
-//        System.out.println(this.associatedNode.data() + this.location);
-//        System.out.println(System.identityHashCode(this.location));
-//        System.out.println(this.associatedNode.data() + this.dimension);
     }
 }

@@ -1,7 +1,5 @@
 package model.layout;
 
-import java.awt.*;
-
 public class DocumentLayout extends Layout {
 
     /*
@@ -15,12 +13,13 @@ public class DocumentLayout extends Layout {
 
     // recursively construct the layout tree
     public void layout() {
-        this.location = new Point(10, 20);
-        this.dimension = new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        this.location.x = DEFAULT_X;
+        this.location.y = DEFAULT_Y;
 
         for (Layout child : this.children) {
             child.layout();
-            this.dimension.height += child.dimension.height;
+            this.dimension.height = Math.max(this.dimension.height, (child.location.y + child.dimension.height) - this.location.y);
+            this.dimension.width = Math.max(this.dimension.width, (child.location.x + child.dimension.width) - this.location.x);
         }
     }
 }

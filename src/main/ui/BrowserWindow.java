@@ -10,8 +10,8 @@ import java.util.*;
 
 // Broad JFrame usage taken from here: https://docs.oracle.com/javase/tutorial/uiswing/components/frame.html
 public class BrowserWindow extends JFrame {
-    public static final int WIDTH = 1200;
-    public static final int HEIGHT = 800;
+    public static final int WIDTH = 1500;
+    public static final int HEIGHT = 500;
 
     private BrowserCanvas canvas;
     private final BrowserBar browserBar;
@@ -34,7 +34,6 @@ public class BrowserWindow extends JFrame {
     public void render(String uri) {
         state.currentTab = uri;
         remove(canvas);
-//        System.out.println(state.currentTab);
         try {
             String file = Files.readString(Path.of(state.currentTab));
             HtmlParser parser = new HtmlParser();
