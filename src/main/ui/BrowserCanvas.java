@@ -19,22 +19,21 @@ public class BrowserCanvas extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Point location = new Point(10, 20); // we need a mutable reference
         g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         g.setColor(Color.WHITE);
-        g.drawString("X", location.x, location.y);
-        renderHtml(this.currentLayout.children, g, location);
+        renderHtml(this.currentLayout.children, g);
     }
 
-    private void renderHtml(ArrayList<Layout> tree, Graphics g, Point location) {
+    private void renderHtml(ArrayList<Layout> tree, Graphics g) {
         for (Layout layout : tree) {
             g.setColor(new Color((int)(Math.random() * 0x1000000)));
             g.drawRect(layout.location.x, layout.location.y, layout.dimension.width, layout.dimension.height);
             g.setColor(Color.WHITE);
-            if (layout.associatedNode instanceof TextNode) {
-                g.drawString(layout.associatedNode.data(), layout.location.x, layout.location.y + layout.dimension.height - 5);
+
+            if (layout.associatedNode instanceof TextNode t) {
+                g.drawString(t.text(), layout.location.x, layout.location.y + layout.dimension.height - 5);
             } else {
-                renderHtml(layout.children, g, location);
+                renderHtml(layout.children, g);
             }
         }
     }

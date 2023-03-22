@@ -23,7 +23,7 @@ public class BrowserBar extends JToolBar {
         tabButton.addActionListener(toggleTabMenu());
         add(tabButton);
 
-        uriInput = new JTextField();
+        uriInput = new JTextField(100);
         add(uriInput);
 
         openUriButton = new JButton("Go");
@@ -39,6 +39,7 @@ public class BrowserBar extends JToolBar {
         };
     }
 
+    // todo: fix this pretty awful code
     public void addTab(String tab) {
         JToggleButton tabButton = new JToggleButton(tab);
 

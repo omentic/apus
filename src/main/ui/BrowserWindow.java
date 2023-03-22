@@ -19,8 +19,14 @@ public class BrowserWindow extends JFrame {
 
     public BrowserWindow() {
         super("apus");
-        state = new BrowserState(new ArrayDeque<>(), "");
 
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        state = new BrowserState(new ArrayDeque<>(), "");
         canvas = new BrowserCanvas(new ArrayList<>());
         browserBar = new BrowserBar(this);
         getContentPane().add(browserBar, BorderLayout.SOUTH);
